@@ -206,6 +206,8 @@ public interface MessageStore {
     public fun all(): List<Envelope>
     public fun addTombstone(msgId: MsgId, until: Long)
     public fun isTombstoned(msgId: MsgId): Boolean
+    public fun removeTombstone(msgId: MsgId)          // for the tombstone cap (policy)
+    public fun tombstones(): Map<MsgId, Long>         // id → until
     public fun purgeExpired(now: Long)               // removes expired envelopes + tombstones
     public fun summary(): Set<IdPrefix>              // 8-byte prefixes of envelopes + tombstones
 }
@@ -216,7 +218,8 @@ public interface MessageStore {
 Policy (in `mesh-core`, **not** inside the store implementation):
 - **Capacity 2,000 envelopes.** On overflow, evict: expired → UPDATEs whose parent is not
   held → oldest Info → oldest Urgent. **Never evict Critical SOS or any ACK/RECEIPT** before
-  expiry; if the store is full of those, reject the incoming envelope (`STORE_FULL`).
+  expiry; if the store is full of those, reject the incoming envelope (`STORE_FULL`),
+  except an ACK/RECEIPT whose referenced SOS is held (accepting it frees that slot).
 - **Capacity 4,000 tombstones.** On overflow, drop the tombstone with the earliest
   `until`. (Worst case: a cleared SOS is accepted again and cleared again by its ACK.)
 - On accepting an **ACK or RECEIPT** for `refMsgId`: remove that SOS and all its UPDATEs,

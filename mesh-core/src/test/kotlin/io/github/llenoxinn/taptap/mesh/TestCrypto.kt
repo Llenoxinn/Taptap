@@ -16,4 +16,11 @@ internal fun serverCodec(random: Random = Random(7)): ServerCodec =
 internal fun factory(clock: Clock, deviceSeed: Int = 1, random: Random = Random(deviceSeed)): EnvelopeFactory =
     EnvelopeFactory(crypto, crypto.signKeypair(seed(deviceSeed)), serverCodec().keyring, clock, random)
 
+internal fun node(
+    clock: Clock,
+    seedN: Int = 50,
+    config: MeshConfig = MeshConfig(),
+    onAccept: (Envelope) -> Unit = {},
+): Node = Node(crypto, crypto.signKeypair(seed(seedN)), serverCodec().keyring, clock, Random(seedN), config, onAccept = onAccept)
+
 internal fun String.hexBytes(): ByteArray = chunked(2).map { it.toInt(16).toByte() }.toByteArray()
