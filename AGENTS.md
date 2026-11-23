@@ -1,7 +1,7 @@
 # AGENTS.md — Rules for every AI agent on Taptap
 
 Read this whole file before doing anything. It applies to every agent and tool
-(Claude Code, Codex, Cursor, Copilot, subagents). `CLAUDE.md` just points here.
+(Claude Code, Codex, Cursor, Copilot, Antigravity, subagents). `CLAUDE.md` just points here.
 
 ## Project in one paragraph
 
