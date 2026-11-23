@@ -1,6 +1,6 @@
 # M1 — Mesh engine on a laptop (`mesh-core` + simulator)
 
-**Status:** spec ready, not started. **Owner go required before work starts** (AGENTS.md W8).
+**Status:** implemented 2026-11-23; results and open owner decision in [docs/devlog.md](../devlog.md). Owner walkthrough given; owner sign-off pending.
 **Reads first:** [AGENTS.md](../../AGENTS.md), [ARCHITECTURE.md](../../ARCHITECTURE.md) §2–§4,
 [PLAN.md](../../PLAN.md) §4–§5. If this file and ARCHITECTURE.md disagree, stop and ask;
 don't guess.
