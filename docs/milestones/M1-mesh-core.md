@@ -220,7 +220,8 @@ public interface MessageStore {
 
 Policy (in `mesh-core`, **not** inside the store implementation):
 - **Capacity 2,000 envelopes.** On overflow, evict: expired → UPDATEs whose parent is not
-  held → oldest Info → oldest Urgent. **Never evict Critical SOS or any ACK/RECEIPT** before
+  held → oldest Info → oldest Urgent, but never an envelope of higher priority than the
+  incoming one (an incoming Info can't push out an Urgent; ACK/RECEIPT rank as Critical). **Never evict Critical SOS or any ACK/RECEIPT** before
   expiry; if the store is full of those, reject the incoming envelope (`STORE_FULL`),
   except an ACK/RECEIPT whose referenced SOS is held (accepting it frees that slot).
 - **Capacity 4,000 tombstones.** On overflow, drop the tombstone with the earliest

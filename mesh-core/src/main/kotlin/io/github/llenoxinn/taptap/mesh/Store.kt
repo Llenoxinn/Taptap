@@ -62,24 +62,31 @@ internal val byAge: Comparator<Envelope> =
 internal object StorePolicy {
     fun hasRoom(store: MessageStore, incoming: Envelope, now: Long, config: MeshConfig): Boolean {
         val all = store.all()
-        if (all.size < config.storeCapacity || victim(all, now) != null) return true
+        if (all.size < config.storeCapacity || victim(all, now, rank(incoming)) != null) return true
         // An ACK/RECEIPT frees its own room by clearing the SOS it answers.
         return incoming.kind.fromServer && incoming.refMsgId?.let(store::get) != null
     }
 
-    fun makeRoom(store: MessageStore, now: Long, config: MeshConfig) {
+    /** [incoming] is the rank of what needs the slot; the node's own messages pass CRITICAL. */
+    fun makeRoom(store: MessageStore, now: Long, config: MeshConfig, incoming: Priority = Priority.CRITICAL) {
         while (store.all().size >= config.storeCapacity) {
-            val v = victim(store.all(), now) ?: return
+            val v = victim(store.all(), now, incoming) ?: return
             store.remove(v.msgId)
         }
     }
 
-    /** Eviction order: expired → UPDATE without its parent → oldest Info → oldest Urgent. Never Critical or ACK/RECEIPT. */
-    private fun victim(all: List<Envelope>, now: Long): Envelope? {
+    /** ACK/RECEIPT rank as Critical: they may push out Info/Urgent. */
+    fun rank(env: Envelope): Priority = if (env.kind.fromServer) Priority.CRITICAL else env.priority
+
+    /**
+     * Eviction order: expired → UPDATE without its parent → oldest Info → oldest Urgent. Never Critical or
+     * ACK/RECEIPT, and never a higher priority than [incoming] (an Info can't push out an Urgent).
+     */
+    private fun victim(all: List<Envelope>, now: Long, incoming: Priority): Envelope? {
         all.firstOrNull { it.expiresAt <= now }?.let { return it }
         val held = all.mapTo(HashSet()) { it.msgId }
         all.filter { it.kind == Kind.UPDATE && it.refMsgId !in held }.minWithOrNull(byAge)?.let { return it }
-        for (p in listOf(Priority.INFO, Priority.URGENT)) {
+        for (p in listOf(Priority.INFO, Priority.URGENT).filter { it >= incoming }) {
             all.filter { !it.kind.fromServer && it.priority == p }.minWithOrNull(byAge)?.let { return it }
         }
         return null

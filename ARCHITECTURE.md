@@ -93,7 +93,8 @@ Full ordered rule list with reject reasons: [M1 spec §6](docs/milestones/M1-mes
 ### 3.3 Storage
 
 - Room DB on Android, in-memory store in simulator, same `MessageStore` interface.
-- Cap 2,000 envelopes. Evict expired first, then oldest Info, then oldest Urgent.
+- Cap 2,000 envelopes. Evict expired first, then oldest Info, then oldest Urgent, never
+  for an incoming message of lower priority (ACK/RECEIPT rank as Critical).
   Critical and ACK/RECEIPT are never evicted before expiry; if the store holds only those,
   a new envelope is refused, except an ACK/RECEIPT whose SOS is held (it frees that slot).
   The node's own SOS is always stored.
@@ -219,6 +220,7 @@ analysis of priority/timing.
 | 2026-11-23 | Crypto behind an interface; libsodium bindings in `crypto-jvm` / Android, not in `mesh-core` | Keeps `mesh-core` dependency-free and lets the same logic run on JVM and Android bindings |
 | 2026-11-23 | `crypto-jvm` uses lazysodium-java 5.2.0 (MPL-2.0, unmodified) + JNA 5.17.0 (Apache-2.0 option of its dual licence); transitive resource-loader and slf4j-api are MIT; bundled libsodium is ISC | All compatible with Apache-2.0 as unmodified dependencies (P6) |
 | 2026-11-23 | A full store still admits an ACK/RECEIPT whose SOS it holds; the node's own SOS is always stored | The ACK frees its own slot; dropping your own SOS is never right |
+| 2026-11-23 | Eviction never removes a higher priority than the incoming envelope | An Info message must not push out an Urgent SOS |
 | 2026-11-23 | UPDATEs are not tombstoned when their SOS is cleared | A late UPDATE carries a better location the server still needs |
 | 2026-11-23 | Simulator reports duplicates caused by a mid-session uplink separately from protocol duplicates (owner to confirm) | The SUMMARY is a snapshot; an uplink can add an id after it is sent. Found in the first baseline run (23 of 69,696 transfers) |
 | 2026-11-23 | Gradle 9.9.2, Kotlin 2.4.21, JUnit 5.14.4, JDK 21 toolchain; foojay plugin pinned in `settings.gradle.kts` | Settings plugins can't read the version catalog |

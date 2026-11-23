@@ -53,6 +53,18 @@ class StorePolicyTest {
     }
 
     @Test
+    fun `a lower priority never evicts a higher one, but an ACK may`() {
+        val node = node(clock, config = MeshConfig(storeCapacity = 2))
+        val (older, newer) = listOf(T0 - 100, T0 - 50).map { sos(Priority.URGENT, at = it) }
+        listOf(older, newer).forEach(node.store::put)
+        assertEquals(Rejected(RejectReason.STORE_FULL), node.receive(sos(Priority.INFO).bytes))
+        assertIs<Accepted>(node.receive(sos(Priority.URGENT).bytes))
+        assertNull(node.store.get(older.msgId), "same priority: oldest goes")
+        assertIs<Accepted>(node.receive(server.receipt(sos(Priority.INFO), T0).bytes))
+        assertNull(node.store.get(newer.msgId), "ACK/RECEIPT outranks Urgent")
+    }
+
+    @Test
     fun `a RECEIPT removes the SOS and its UPDATEs, tombstones the SOS, and is kept`() {
         val node = node(clock)
         val sosFactory = factory(clock, deviceSeed = 3)

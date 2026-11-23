@@ -74,7 +74,7 @@ public class Node(
         val env = outcome.envelope.withHops(outcome.envelope.hops + 1)
         val now = clock.now()
         if (env.kind.fromServer) StorePolicy.clear(store, env, config)
-        StorePolicy.makeRoom(store, now, config)
+        StorePolicy.makeRoom(store, now, config, StorePolicy.rank(env))
         store.put(env)
         if (!env.kind.fromServer) acceptLog.getOrPut(env.senderKey.toHex()) { ArrayDeque() }.addLast(now to env.kind)
         onAccept(env)
