@@ -54,6 +54,12 @@ public class Node(
 
     public fun session(): SyncSession = SyncSession(this)
 
+    public fun uplinkBatch(): UplinkBatch =
+        UplinkBatch(store.all().filter { !it.kind.fromServer }.map { it.bytes }, store.summary())
+
+    /** Server replies go through the same receive rules as anything from the mesh. */
+    public fun applyUplinkResult(result: UplinkResult): List<ReceiveOutcome> = result.envelopes.map(::receive)
+
     public fun sendSos(req: SosRequest): Envelope = factory.sos(req).also {
         keep(it)
         mySos += it.msgId
