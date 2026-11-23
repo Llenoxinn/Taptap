@@ -14,6 +14,7 @@ application {
 dependencies {
     implementation(project(":mesh-core"))
     implementation(project(":crypto-jvm"))
+    runtimeOnly(libs.slf4j.nop)
     testImplementation(kotlin("test"))
     testImplementation(platform(libs.junit.bom))
     testRuntimeOnly(libs.junit.platform.launcher)
