@@ -1,0 +1,48 @@
+# Local agent / tool state
+.remember/
+.claude/settings.local.json
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+*.key
+*.pem
+*.p8
+*.p12
+secrets/
+google-services.json
+supabase/.temp/
+
+# Android / Gradle
+.gradle/
+build/
+local.properties
+*.apk
+*.aab
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Node / dashboard
+node_modules/
+dist/
+.vite/
+coverage/
+
+# Bulky assets — keep out of git (store source art elsewhere, commit exports only)
+*.psd
+*.ai
+*.mp4
+*.mov
+*.zip
+*.7z
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
