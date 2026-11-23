@@ -9,7 +9,9 @@ Taptap is a personal, offline-first Android SOS app. Phones relay signed, encryp
 messages to each other over Bluetooth/Wi-Fi (Google Nearby Connections) until one reaches
 the internet and uploads them to a Supabase backend and a React responder dashboard;
 signed ACKs flow back. **No LGU partnership, no business model, no SMS gateway** — the goal
-is a working app. Read [PLAN.md](PLAN.md) for scope, [ARCHITECTURE.md](ARCHITECTURE.md) for
+is a working, measured proof. It is open source (Apache-2.0), built on a **₱0 budget**, has
+**no deadline**, and is released as a public APK that is **not monitored**. Agents write the
+code; the owner reviews, steers and tests on phones. Read [PLAN.md](PLAN.md) for scope, [ARCHITECTURE.md](ARCHITECTURE.md) for
 the protocol, [DESIGN.md](DESIGN.md) for UX.
 
 ---
@@ -55,6 +57,9 @@ Skip for typo-level edits.
 ### W6. Let the user grill the plan
 For design or planning work, offer to run the `grilling` skill (or ask a short set of hard
 questions yourself) so the user can stress-test the decision before it is built.
+Before offering any option, check it against the actual mechanism (OS limits, radio
+behaviour, API rules). Example of the failure this prevents: offering "wake a phone when a
+neighbour sends an SOS" when a phone that isn't relaying can't hear one.
 
 ### W7. Mistakes: no apologies, find the cause in the instructions
 - Do not apologise. Apologies don't fix anything.
@@ -62,6 +67,14 @@ questions yourself) so the user can stress-test the decision before it is built.
   missing, unclear or conflicting (in this file, PLAN.md, ARCHITECTURE.md, or the prompt),
   **(3)** the exact fix to that instruction, written as a diff or a new rule.
 - Then fix the work itself.
+
+### W8. Explain before, walk through after
+The owner doesn't write the code, but must be able to explain the app.
+- **Before a milestone:** a short plain-language plan (what, why, how it will be checked),
+  and wait for a go.
+- **After a milestone:** a short walkthrough of what was built and how to run it.
+- **End of every session:** add an entry to `docs/devlog.md` (date, what was done, where
+  it stopped, next step) so work can resume after a long break.
 
 ---
 
@@ -94,8 +107,14 @@ questions yourself) so the user can stress-test the decision before it is built.
 - **P3.** The envelope must stay **< 300 bytes**. A codec test asserts the max size; never
   delete it.
 - **P4.** The UI never shows "Delivered" or "Help is coming" without a verified signed
-  RECEIPT/ACK (DESIGN.md §1, principle 2).
+  RECEIPT/ACK (DESIGN.md §1, principle 2). Nothing ever sends an ACK automatically; only a
+  human responder clicking Acknowledge does. Never remove the "Not monitored" warnings
+  (DESIGN.md §3) without the owner's explicit decision.
 - **P5.** Protocol changes update ARCHITECTURE.md (and its decisions log) **in the same commit**.
+- **P6.** ₱0 budget. Never add a paid service, paid tier, paid API or paid licence without
+  the owner's OK. Dependencies must be compatible with Apache-2.0.
+- **P7.** Collect as little personal data as possible. No names, phone numbers or contacts
+  without an explicit owner decision; respect the retention rules in ARCHITECTURE.md §5.
 
 ### Important (follow unless justified)
 - Kotlin: official style, explicit return types on public functions, no `!!` in `mesh-core`.
