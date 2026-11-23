@@ -10,7 +10,8 @@ see, touch and read.
 2. **Never lie about status.** Show exactly what has happened to the SOS (saved, passed to
    N phones, delivered, acknowledged). Never imply help is coming before an ACK exists.
 3. **Works before it's needed.** All permissions, language and setup happen on a calm day.
-4. **Battery is life.** Dark UI by default, no animations in relay mode, nothing polls.
+4. **Battery is life.** Dark UI by default, no animations in relay mode, nothing polls
+   except the single 15-minute background signal check (ARCHITECTURE.md §3.5).
 5. **Local first.** Cebuano, Filipino and English are equal; every string is translated.
 
 ## 2. Brand
@@ -46,13 +47,17 @@ System font (Roboto on Android) — no bundled fonts, keeps the APK small. Minim
 
 ### 3.1 Onboarding (first run, calm day)
 
-1. Welcome — Taptap mascot, one sentence: "Taptap passes your SOS phone to phone when there is no signal."
-2. Language — Cebuano / Filipino / English (big buttons).
-3. Permissions — one screen per permission, each with a one-line why:
+1. Language — Cebuano / Filipino / English (big buttons), first so everything after is readable.
+2. Welcome — Taptap mascot, one sentence: "Taptap passes your SOS phone to phone when there is no signal."
+3. **Test version warning** — full screen, must tap "I understand":
+   "This is a test version. Nobody is watching for SOS messages. In an emergency, call 911 if you can."
+4. Permissions — one screen per permission, each with a one-line why:
    Location ("so rescuers can find you"), Nearby devices ("to pass messages to other phones"),
    Notifications ("to tell you when help is coming").
-4. Battery exemption — brand-detected guide with screenshots (see R2 in PLAN.md).
-5. Optional: name + number of people in household (pre-fills headcount).
+5. Battery exemption — brand-detected guide with screenshots (see R2 in PLAN.md).
+6. Optional: number of people in household (pre-fills headcount). No name is collected —
+   it never goes in the message, so the app doesn't ask for it.
+7. Privacy notice — what is sent, who can read it, and when it is deleted (ARCHITECTURE.md §5).
 
 ### 3.2 Home
 
@@ -69,6 +74,8 @@ System font (Roboto on Android) — no bundled fonts, keeps the APK small. Minim
 │                          │
 │  Disaster Mode   [ ON ]  │
 │  Carrying 12 messages    │
+│ ⚠ Test version · not     │  ← permanent, cannot be dismissed
+│   monitored · call 911   │
 └──────────────────────────┘
 ```
 
@@ -81,7 +88,7 @@ System font (Roboto on Android) — no bundled fonts, keeps the APK small. Minim
 2. **People** — stepper `– 4 +` (pre-filled), and "Injured: 0 / 1 / 2 / 3+".
 3. **Send** — big confirm button. Optional note via preset chips
    ("Flooding", "Elderly", "Child", "Pregnant", "Need medicine"); free text is optional and
-   collapsed by default.
+   collapsed by default. Above the button: "Not monitored. Call 911 if you can."
 
 Sending works with zero GPS fix: the SOS goes out with "location pending" and updates itself.
 
@@ -101,6 +108,12 @@ Below the list: "Keep Taptap open and your phone charged. Move to higher ground 
 
 ### 3.5 Relay (Disaster Mode)
 
+Turns on by the Home switch, or **automatically 15–30 minutes after signal is lost**
+(`relay_auto_on`: "No signal — Taptap turned on relaying"). If Android blocks the automatic
+start, the app posts `relay_auto_failed`: "No signal — tap to turn on relaying". Stays on
+until the user turns it off. "Signal" means a working internet connection
+(ARCHITECTURE.md §3.5).
+
 Persistent notification: "Taptap is relaying · 12 messages · tap to stop." Below 20%
 battery: "Low battery: passing Critical messages only."
 
@@ -118,12 +131,26 @@ see ARCHITECTURE.md §2 — so it is hidden from the responder queue by default)
 | `status_saved` | Saved on your phone | Naka-save sa phone mo | Na-save sa imong phone |
 | `status_ack` | Help is coming. | Naabot na. Parating na ang tulong. | Naabot na. Padulong na ang tabang. |
 | `relay_on` | Taptap is relaying | Nagpapasa ang Taptap | Nagpasa ang Taptap |
+| `not_monitored` | Not monitored. Call 911 if you can. | Walang nagbabantay. Tumawag sa 911 kung kaya. | Walay nagbantay. Tawag sa 911 kon makaya. |
+| `onboarding_test_warning` | This is a test version. Nobody is watching for SOS messages. In an emergency, call 911 if you can. | Test version ito. Walang nagbabantay ng mga SOS. Sa emergency, tumawag sa 911 kung kaya. | Test version ni. Walay nagbantay sa mga SOS. Sa emergency, tawag sa 911 kon makaya. |
+| `home_test_banner` | Test version · not monitored · call 911 | Test version · walang nagbabantay · tumawag sa 911 | Test version · walay nagbantay · tawag sa 911 |
+| `relay_auto_on` | No signal — Taptap turned on relaying | Walang signal — binuksan ng Taptap ang pagpapasa | Walay signal — giablihan sa Taptap ang pagpasa |
+| `relay_auto_failed` | No signal — tap to turn on relaying | Walang signal — i-tap para buksan ang pagpapasa | Walay signal — i-tap aron ablihan ang pagpasa |
 
-> Translations above are a first draft — have native speakers review before M6.
+Dashboard strings ("Waiting for approval", "Show test reports", "TEST MODE") are English-only
+in MVP: responders are the owner and testers.
+
+> Translations above are a first draft. A native-speaker review of **every** Cebuano and
+> Filipino string in the app is **required** before the public APK (PLAN.md M6).
 
 ## 5. Responder dashboard
 
 Single page, desktop-first, usable on a tablet.
+
+- **TEST MODE bar** across the top, always visible: "Test deployment — not monitored 24/7."
+- **Login:** email magic link. New accounts land on "Waiting for approval" until the owner
+  changes their role to `responder` (ARCHITECTURE.md §5). No approval UI in MVP.
+- **Show test reports** toggle, off by default.
 
 - **Map (70%)** — MapLibre on OSM tiles. Pins colored *and shaped* by priority
   (critical = filled circle, urgent = triangle, info = square). Clusters at low zoom.
