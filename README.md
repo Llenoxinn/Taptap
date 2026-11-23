@@ -8,7 +8,10 @@ Bluetooth and Wi-Fi until any one of them reaches the internet and delivers them
 responder dashboard. The responder's signed acknowledgement ("Help is coming.") travels back the same way.
 
 **Status:** personal project, pre-MVP. No partnerships, no LGU integration, no funding ask.
-The goal is a working app that does the job end to end.
+The goal is a working app that does the job end to end, proven in a field test.
+
+> ⚠ **Not monitored.** Builds of Taptap are test versions. Nobody is on duty watching for
+> SOS messages. In an emergency, call **911** if you can.
 
 ## Docs
 
@@ -25,3 +28,7 @@ The goal is a working app that does the job end to end.
 - **Mesh engine:** pure Kotlin/JVM module, simulated on a laptop
 - **Backend:** Supabase (Postgres + PostGIS, Auth, Realtime, Edge Functions)
 - **Dashboard:** React + Vite + MapLibre GL on OpenStreetMap tiles
+
+## License
+
+[Apache-2.0](LICENSE).
