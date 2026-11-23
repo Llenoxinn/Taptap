@@ -280,7 +280,9 @@ anything else.
 public class SyncSession(/* node, clock, config */) {
     public fun start(): List<Frame>
     public fun onFrame(frame: Frame): List<Frame>
-    public fun onTick(): List<Frame>          // checks timeout
+    public fun onBytes(bytes: ByteArray): List<Frame>   // decode; malformed → FAILED
+    public fun onTick()                       // checks stall/cap; never sends
+    public fun onDisconnect()                 // transport lost the peer → DISCONNECTED
     public val state: SessionState
     public val stats: SessionStats
 }

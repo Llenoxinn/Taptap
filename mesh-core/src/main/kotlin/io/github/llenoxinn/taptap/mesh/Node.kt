@@ -29,6 +29,31 @@ public class Node(
 
     public val senderKey: ByteArray get() = keys.publicKey
 
+    private var token: Long = random.nextLong()
+    private var tokenAt: Long = clock.now()
+    private val sessionEnds = HashMap<Long, Long>()
+
+    /** Random per node, rotated every 24 h. Not derived from [senderKey], so peers can't link relaying to a sender. */
+    public val nodeToken: Long
+        get() {
+            val now = clock.now()
+            if (now - tokenAt >= TOKEN_ROTATE_S) {
+                token = random.nextLong()
+                tokenAt = now
+            }
+            return token
+        }
+
+    /** A new session with this peer token is skipped for `peerCooldownS` after the last one ended. */
+    public fun inCooldown(peerToken: Long): Boolean =
+        sessionEnds[peerToken]?.let { clock.now() - it < config.peerCooldownS } ?: false
+
+    internal fun sessionEnded(peerToken: Long) {
+        sessionEnds[peerToken] = clock.now()
+    }
+
+    public fun session(): SyncSession = SyncSession(this)
+
     public fun sendSos(req: SosRequest): Envelope = factory.sos(req).also {
         keep(it)
         mySos += it.msgId
@@ -68,5 +93,9 @@ public class Node(
     private fun keep(env: Envelope) {
         StorePolicy.makeRoom(store, clock.now(), config)
         store.put(env)
+    }
+
+    private companion object {
+        const val TOKEN_ROTATE_S = 24 * 3600L
     }
 }
