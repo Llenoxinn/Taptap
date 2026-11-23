@@ -222,5 +222,5 @@ analysis of priority/timing.
 | 2026-11-23 | A full store still admits an ACK/RECEIPT whose SOS it holds; the node's own SOS is always stored | The ACK frees its own slot; dropping your own SOS is never right |
 | 2026-11-23 | Eviction never removes a higher priority than the incoming envelope | An Info message must not push out an Urgent SOS |
 | 2026-11-23 | UPDATEs are not tombstoned when their SOS is cleared | A late UPDATE carries a better location the server still needs |
-| 2026-11-23 | Simulator reports duplicates caused by a mid-session uplink separately from protocol duplicates (owner to confirm) | The SUMMARY is a snapshot; an uplink can add an id after it is sent. Found in the first baseline run (23 of 69,696 transfers) |
+| 2026-11-23 | Simulator reports duplicates caused by a mid-session uplink separately from protocol duplicates (owner accepted 2026-11-23) | The SUMMARY is a snapshot; an uplink can add an id after it is sent. Found in the first baseline run (23 of 69,696 transfers) |
 | 2026-11-23 | Gradle 9.9.2, Kotlin 2.4.21, JUnit 5.14.4, JDK 21 toolchain; foojay plugin pinned in `settings.gradle.kts` | Settings plugins can't read the version catalog |

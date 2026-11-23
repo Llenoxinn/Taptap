@@ -2,6 +2,22 @@
 
 Newest entry first. One entry per work session (AGENTS.md W8).
 
+## 2026-11-23 (night) — M1 follow-ups
+
+- **Done:** pushed M1 to GitHub. Owner **accepted the duplicate split** (protocol
+  duplicates must be 0; uplink-overlap duplicates are reported separately). Eviction no
+  longer lets a lower priority push out a higher one (ACK/RECEIPT rank as Critical).
+  Simulator no longer prints the SLF4J warning. 72 tests pass; all presets re-run with
+  the same numbers as the table below.
+- **Finding (no change made):** `RATE_LIMITED` ×8 in `sparse` is **not** a simulator
+  artefact. Capping every simulated origin at 5 SOS/hour left it at 8. Cause: relays count
+  the limit by their own clock (deliberate, so senders can't backdate), so a relay that
+  meets a carrier late can receive 6 of one person's SOS in one burst even if they were
+  sent hours apart; the 6th waits until the relay's hour passes. Delivery was still 100%.
+  The cap was reverted (it fixed nothing).
+- **Stopped at:** M1 done and accepted; follow-up commits local until pushed.
+- **Next:** M2 (Android app, two phones in airplane mode); needs Android Studio + SDK.
+
 ## 2026-11-23 (evening) — M1 built
 
 - **Done:** M1 tasks 1–10. Gradle 9.9.2 / Kotlin 2.4.21 / JDK 21 build with `mesh-core`,

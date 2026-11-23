@@ -47,7 +47,7 @@ Every box must be true. Copy this list into the final walkthrough with ✅/❌.
 - [ ] Simulator reports **0 duplicate envelope transfers** (summary exchange works; holds
       because a node runs one session at a time, §8.2). Counted per envelope; a duplicate
       of an id the receiver got by uplink *during* that session is reported separately
-      (`uplinkOverlapDuplicates`, §10.2). **Owner decision pending** on this split.
+      (`uplinkOverlapDuplicates`, §10.2). Split accepted by the owner on 2026-11-23.
 - [ ] AGENTS.md "Commands" section filled in; ARCHITECTURE.md updated for anything that
       changed; `docs/devlog.md` entry; owner walkthrough given (W8).
 
