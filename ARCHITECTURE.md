@@ -16,9 +16,10 @@ same commit.
 
 | Module | Path (planned) | Language | Depends on |
 |---|---|---|---|
-| `mesh-core` | `mesh-core/` | Kotlin/JVM, no Android imports | libsodium binding (lazysodium) |
-| `simulator` | `simulator/` | Kotlin/JVM CLI | `mesh-core` |
-| Android app | `android/` | Kotlin, Compose, Room | `mesh-core`, Nearby Connections |
+| `mesh-core` | `mesh-core/` | Kotlin/JVM, no Android imports, no crypto library | stdlib only in main scope (tests may use `crypto-jvm`); crypto behind the `Crypto` interface |
+| `crypto-jvm` | `crypto-jvm/` | Kotlin/JVM | `mesh-core`, lazysodium-java |
+| `simulator` | `simulator/` | Kotlin/JVM CLI | `mesh-core`, `crypto-jvm` |
+| Android app | `android/` | Kotlin, Compose, Room | `mesh-core`, lazysodium-android, Nearby Connections |
 | Backend | `supabase/` | SQL migrations, Deno Edge Functions | libsodium-wrappers |
 | Dashboard | `dashboard/` | TypeScript, React, Vite, MapLibre | supabase-js |
 
@@ -29,7 +30,8 @@ storage and OS lifecycle to interfaces `mesh-core` defines (`Transport`, `Messag
 ## 2. Message envelope (target < 300 bytes)
 
 Binary, little-endian, versioned. Cleartext header is what relays need to route; the body
-is readable only by the server.
+is readable only by the server. Exact byte offsets and per-kind bodies:
+[docs/milestones/M1-mesh-core.md §5](docs/milestones/M1-mesh-core.md).
 
 | Field | Bytes | Cleartext? | Notes |
 |---|---|---|---|
@@ -66,27 +68,37 @@ a unit test that asserts the max size.
 
 1. Advertise + discover with Nearby Connections, strategy `P2P_CLUSTER`.
 2. On connect, both sides send a **summary**: the first 8 bytes of every `msgId` they hold
-   (SOS and ACK tombstones). 1,000 messages = 8 KB; the 2,000 cap = 16 KB. No Bloom filter
-   until measured as needed.
+   (envelopes and tombstones). At the caps (2,000 + 4,000) that is 48 KB, sent as up to 3
+   SUMMARY frames of ≤ 16 KB each to stay under Nearby's 32 KB payload limit. No Bloom
+   filter until measured as needed.
 3. Each side sends what the other is missing, in this order:
    **ACKs/RECEIPTs → Critical → Urgent → Info**, oldest first within a level.
-4. Disconnect after the swap or 30 s, whichever comes first. Cool down 2 min per peer
-   session token before reconnecting.
+4. Disconnect after the swap, after a 10 s stall, or at a 120 s hard cap (enough for a
+   full store at ~20 envelopes/s). Everything already validated is kept. A node runs one
+   session at a time. Cool down 2 min per peer session token before reconnecting.
 
 ### 3.2 Receive rules (in order, drop on first failure)
 
 1. Version known, size < 300 bytes.
 2. Signature valid (sender key for SOS, pinned server key for ACK/RECEIPT).
-3. Not expired, `hops < 16`.
+3. Not expired, not dated > 10 min in the future, `expiresAt − createdAt` ≤ the
+   priority's TTL, `hops < 16`.
 4. Not already held, not tombstoned.
-5. Per-sender rate limit: ≤ 5 SOS per sender key per hour accepted for relay.
+5. Per-sender rate limit: ≤ 5 SOS and ≤ 10 UPDATE per sender key per rolling hour,
+   counted by the **receiver's** clock in a local accept log (never by `createdAt`, which
+   the sender controls).
+
+Full ordered rule list with reject reasons: [M1 spec §6](docs/milestones/M1-mesh-core.md).
 
 ### 3.3 Storage
 
 - Room DB on Android, in-memory store in simulator, same `MessageStore` interface.
 - Cap 2,000 envelopes. Evict expired first, then oldest Info, then oldest Urgent.
   Critical is never evicted before expiry.
-- An ACK for `msgId` deletes that SOS and keeps a tombstone (16 bytes) until its `expiresAt`.
+- Tombstone cap 4,000; on overflow drop the one expiring soonest.
+- An ACK **or RECEIPT** for `msgId` deletes that SOS and its UPDATEs from relays and keeps
+  a tombstone until its `expiresAt`. The ACK/RECEIPT itself keeps travelling toward the
+  origin. UPDATE envelopes carry their parent `refMsgId` in cleartext so relays can do this.
 
 ### 3.4 Uplink (any phone with internet)
 
@@ -117,7 +129,7 @@ for IDs in the summary. The phone injects those into its store so they flow back
 | Threat | Control |
 |---|---|
 | Forged or altered SOS | Ed25519 signature checked by every relay and the server |
-| Relays reading victim data | Body sealed to server key. Relays see priority, kind, timestamps, hops, body length and a per-install pseudonymous key (which links one install's messages) — never location, people or note |
+| Relays reading victim data | Body sealed to server key. Relays see priority, kind, timestamps, hops, body length, an UPDATE's parent id, and a per-install pseudonymous key (which links one install's messages) — never location, people or note |
 | Fake "help is coming" | ACKs signed by pinned server key only |
 | Spam flooding mesh | Per-sender relay rate limit, hop limit, expiry, storage cap |
 | Spam reaching dashboard | Server-side rate limit per sender key; responder "mark false" flags the key |
@@ -197,3 +209,7 @@ analysis of priority/timing.
 | 2026-11-23 | Auto-delete reports (7 d test, 30 d real); keep anonymous metrics only | Data Privacy Act (RA 10173): keep personal data only as long as needed |
 | 2026-11-23 | Relay = manual + auto-on 15–30 min after signal loss; no wake-on-SOS | A non-relaying phone can't hear an SOS; battery drain drives uninstalls |
 | 2026-11-23 | libsodium everywhere | Same primitives on JVM, Android and Deno |
+| 2026-11-23 | RECEIPT (not only ACK) clears relay copies | Once the server has it, relay copies only waste storage and airtime |
+| 2026-11-23 | Sync session: one at a time per node, 10 s stall / 120 s cap, multi-frame SUMMARY | Avoids duplicate transfers; fits a full store; stays under Nearby's 32 KB payload limit |
+| 2026-11-23 | Rate limit counted by receiver clock | `createdAt` is sender-controlled and can be backdated |
+| 2026-11-23 | Crypto behind an interface; libsodium bindings in `crypto-jvm` / Android, not in `mesh-core` | Keeps `mesh-core` dependency-free and lets the same logic run on JVM and Android bindings |

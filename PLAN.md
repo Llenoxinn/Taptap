@@ -138,7 +138,7 @@ Each milestone ends with something runnable and a short demo note in `docs/devlo
 | # | Milestone | Done when |
 |---|---|---|
 | M0 | **Repo + docs** | This plan, DESIGN.md, ARCHITECTURE.md, AGENTS.md committed |
-| M1 | **Mesh engine on a laptop** | Pure-Kotlin engine passes unit tests; every envelope is signed and its body sealed to the server key; tampered or forged envelopes are rejected by the receive rules (ARCHITECTURE.md §3.2); simulator runs 100 virtual phones on a random-walk map and reports delivery rate + median latency |
+| M1 | **Mesh engine on a laptop** — full spec: [docs/milestones/M1-mesh-core.md](docs/milestones/M1-mesh-core.md) | Pure-Kotlin engine passes unit tests; every envelope is signed and its body sealed to the server key; tampered or forged envelopes are rejected by the receive rules (ARCHITECTURE.md §3.2); simulator runs 100 virtual phones on a random-walk map and reports delivery rate + median latency |
 | M2 | **Two phones, airplane mode** | SOS on phone A appears in phone B's store with Wi-Fi/mobile data off |
 | M3 | **End-to-end** | SOS from offline phone → relay → online phone → dashboard pin → ACK shown on origin phone |
 | M4 | **Hardening** | Foreground service survives 8 h on an entry-level phone; battery measured; OEM battery-saver guide written |

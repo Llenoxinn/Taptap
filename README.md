@@ -21,6 +21,8 @@ The goal is a working app that does the job end to end, proven in a field test.
 | [DESIGN.md](DESIGN.md) | Product and UX design: brand, screens, copy, accessibility |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Technical design: message format, mesh protocol, security, backend |
 | [AGENTS.md](AGENTS.md) | Rules every AI agent working on this repo must follow |
+| [docs/milestones/](docs/milestones/) | Build specs per milestone (start with M1) |
+| [docs/devlog.md](docs/devlog.md) | Where work last stopped |
 
 ## Planned stack
 
