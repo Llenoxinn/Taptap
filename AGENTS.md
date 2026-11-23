@@ -93,6 +93,10 @@ The owner doesn't write the code, but must be able to explain the app.
 - **G5. Never push on your own.** `git push` (and force-push, tags, releases) only when the
   user asks in the current conversation. Committing locally is fine.
 - **G6.** Don't rewrite published history. Don't use `--no-verify`.
+- **G7. Commit only after green checks.** Run `git commit` only in a command that stops on
+  failure (`set -e`, or `&&` after the check). Never chain a commit after `;`, where it runs
+  even if the tests or the edit before it failed. Why: it happened twice in M1 (a broken
+  string literal and a missing spec edit got committed and had to be amended).
 
 ---
 
