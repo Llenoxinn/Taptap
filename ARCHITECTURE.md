@@ -97,6 +97,18 @@ for IDs in the summary. The phone injects those into its store so they flow back
 ### 3.5 Power
 
 - Foreground service, type `connectedDevice` (Android 14+ requirement).
+- **"No signal" means no validated network** (`NET_CAPABILITY_VALIDATED` absent on every
+  network). All docs use "no signal" in this sense.
+- **Start triggers:** (1) the Disaster Mode switch; (2) a `WorkManager` periodic job
+  (every 15 min, the platform minimum; this is the app's only background poll). It records
+  when signal was first missing and starts the service once that is ≥ 15 min ago. Because
+  of the job period and Doze, the actual auto-on happens **15–30 min** after signal loss.
+- Android 12+ blocks foreground-service starts from the background unless an exemption
+  applies; battery-optimisation exemption (onboarding step, DESIGN.md §3.1) is the one we
+  rely on. If the start throws `ForegroundServiceStartNotAllowedException`, post the
+  `relay_auto_failed` notification (DESIGN.md §4) instead.
+- A phone that isn't relaying can't hear a neighbour's SOS, so there is no "wake on SOS"
+  (PLAN.md R10). Once on, relaying stays on until the user turns it off.
 - Duty cycle: scan/advertise 20 s on, 40 s off by default.
 - Battery < 20%: relay Critical + ACK only, duty cycle 10 s on / 110 s off.
 
@@ -118,11 +130,31 @@ analysis of priority/timing.
 
 - `reports` — `msg_id uuid pk`, `sender_key bytea`, `priority smallint`, `created_at`,
   `received_at`, `location geography(Point,4326)`, `accuracy_m`, `people`, `injured`,
-  `flags`, `note`, `hops`, `is_test bool`, `status` (`new|acked|resolved|false`),
-  `acked_at`, `acked_by`.
+  `expires_at` (from the envelope), `flags`, `note`, `hops`, `is_test bool`,
+  `status` (`new|acked|resolved|false`), `acked_at`, `acked_by`, `closed_at` (set when
+  status becomes `resolved` or `false`).
 - `senders` — `sender_key pk`, `first_seen`, `report_count`, `flagged bool`.
-- RLS: no anon access. Inserts only from the Edge Function (service role). Reads/updates only
-  for authenticated responder accounts.
+- `profiles` — `user_id pk → auth.users`, `role` (`pending|responder`, default `pending`),
+  `created_at`. A trigger creates the row on sign-up and **hard-codes `role = 'pending'`**
+  (it never reads sign-up metadata).
+- `report_metrics` — anonymous, kept after reports are deleted: `priority`, `hops`,
+  `latency_s` (created → received), `ack_latency_s`, `is_test`, `day`. No location,
+  sender key, note or msg_id.
+- **Access:** sign-up by email magic link is open, but every new account is `pending`. The
+  owner promotes accounts to `responder` by editing `profiles.role` in the Supabase console
+  (no approval UI in MVP). Accounts can also be invited from the console.
+- RLS: no anon access. Inserts only from the Edge Function (service role). Reads/updates of
+  `reports` only where the caller's `profiles.role = 'responder'`. `pending` sees nothing.
+  `profiles` has a SELECT policy for the caller's own row and **no UPDATE/INSERT/DELETE
+  policy** for `authenticated`, so nobody can promote themselves; only the console (service
+  role) changes `role`.
+- **Auth email:** Supabase's built-in email sender is rate-limited and meant for
+  development. It is enough for a handful of responders; if it isn't, a free-tier SMTP
+  provider needs the owner's OK (AGENTS.md P6). Fallback: the owner creates accounts with a
+  password in the console (PLAN.md R11).
+- **Retention** (nightly `pg_cron` job): delete `is_test` reports 7 days after
+  `received_at`; delete other reports 30 days after `closed_at` or `expires_at`, whichever
+  comes first. Delete `senders` rows with no remaining reports.
 - Realtime enabled on `reports` for the dashboard.
 - Idempotent intake: `insert … on conflict (msg_id) do update set hops = least(reports.hops, excluded.hops)`.
   Intake **never** writes `status`, `acked_at` or `acked_by` — only responders do.
@@ -160,4 +192,8 @@ analysis of priority/timing.
 | 2026-11-23 | Personal project; no LGU, no SMS gateway in MVP | Ship a working app first (PLAN.md §0) |
 | 2026-11-23 | Plain ID-list summary instead of Bloom filter | ≤ 16 KB even at the storage cap; YAGNI |
 | 2026-11-23 | Info priority ("I'm safe", hazards) is in MVP | Cheap to support; reduces "is my family OK" load on responders |
+| 2026-11-23 | Signing **and** sealing from M1 | App is public, so real locations pass through strangers' phones; adding sealing later would change the format and cut old phones off the mesh |
+| 2026-11-23 | Invite + request access with a `pending` role; approval in the console | No admin UI to build; each responder keeps their own login |
+| 2026-11-23 | Auto-delete reports (7 d test, 30 d real); keep anonymous metrics only | Data Privacy Act (RA 10173): keep personal data only as long as needed |
+| 2026-11-23 | Relay = manual + auto-on 15–30 min after signal loss; no wake-on-SOS | A non-relaying phone can't hear an SOS; battery drain drives uninstalls |
 | 2026-11-23 | libsodium everywhere | Same primitives on JVM, Android and Deno |
