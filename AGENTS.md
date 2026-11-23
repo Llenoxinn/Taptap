@@ -123,8 +123,19 @@ The owner doesn't write the code, but must be able to explain the app.
 - Prefer the standard library and platform APIs over new dependencies.
 
 ### Commands
-_Not scaffolded yet._ When a module is created, add its file-scoped and full commands here
-(test one file, test module, lint, build) in the same commit.
+Gradle wrapper, JDK 21 toolchain (downloaded automatically). On Windows use `gradlew.bat`.
+
+| What | Command |
+|---|---|
+| All tests | `gradlew.bat test` |
+| One module | `gradlew.bat :mesh-core:test` |
+| One test class | `gradlew.bat :mesh-core:test --tests "*ValidatorTest*"` |
+| Rewrite golden vectors (on purpose only) | `gradlew.bat :mesh-core:test --tests "*GoldenVectorsTest*" -PwriteVectors` |
+| Simulator | `gradlew.bat :simulator:run --args="--preset baseline --seeds 1-5"` |
+| Build everything | `gradlew.bat build` |
+
+No separate linter yet (YAGNI); the compiler's `explicitApi()` check runs on `mesh-core` and `crypto-jvm`.
+When a module is added, add its commands here in the same commit.
 
 ---
 
