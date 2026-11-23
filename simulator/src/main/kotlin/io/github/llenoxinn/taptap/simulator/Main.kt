@@ -26,7 +26,12 @@ fun main(args: Array<String>) {
         System.err.println("${e.message}\n$USAGE")
         exitProcess(2)
     }
-    val seeds = parseSeeds(opts["seeds"] ?: "1")
+    val seeds = try {
+        parseSeeds(opts["seeds"] ?: "1")
+    } catch (e: IllegalArgumentException) {
+        System.err.println("${e.message}\n$USAGE")
+        exitProcess(2)
+    }
 
     println("Taptap simulator: preset=$preset seeds=${seeds.first()}..${seeds.last()}")
     println(params)
@@ -84,6 +89,8 @@ internal fun parseArgs(args: Array<String>): Map<String, String> {
 
 /** "3" or "1-5". */
 internal fun parseSeeds(s: String): List<Long> {
-    val parts = s.split("-").map { it.trim().toLong() }
-    return if (parts.size == 1) parts else (parts[0]..parts[1]).toList()
+    val parts = s.split("-").map { it.trim().toLongOrNull() ?: throw IllegalArgumentException("bad --seeds $s") }
+    val seeds = if (parts.size == 1) parts else (parts[0]..parts[1]).toList()
+    require(parts.size <= 2 && seeds.isNotEmpty()) { "bad --seeds $s (use 3 or 1-5)" }
+    return seeds
 }

@@ -96,6 +96,7 @@ public class Node(
         return log.count { it.second == env.kind } >= limit
     }
 
+    /** The user's own messages are always stored, even past capacity: dropping your own SOS is never right. */
     private fun keep(env: Envelope) {
         StorePolicy.makeRoom(store, clock.now(), config)
         store.put(env)

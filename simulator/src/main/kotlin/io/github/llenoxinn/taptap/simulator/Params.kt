@@ -29,6 +29,13 @@ data class Params(
     val criticalOnlyShare: Double = 0.0,
     val durationS: Int = 6 * 3600,
 ) {
+    init {
+        require(nodes >= 2 && areaM > 0 && rangeM > 0 && sosWindowS > 0 && durationS > 0) { "sizes and durations must be positive" }
+        require(walkMinMps < walkMaxMps && vehicleMinMps < vehicleMaxMps) { "speed min must be below max" }
+        require(updateMinS <= updateMaxS && ackMinS <= ackMaxS && pauseMaxS >= 0) { "min must not exceed max" }
+        require(criticalPct + urgentPct <= 100 && envelopesPerS >= 1 && zones >= 0) { "bad priority mix, rate or zones" }
+    }
+
     /** `--name value` overrides; every field is overridable. */
     fun override(name: String, v: String): Params = when (name) {
         "nodes" -> copy(nodes = v.toInt())

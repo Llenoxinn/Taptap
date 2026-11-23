@@ -13,6 +13,7 @@ import io.github.llenoxinn.taptap.mesh.MeshConfig
 import io.github.llenoxinn.taptap.mesh.MsgId
 import io.github.llenoxinn.taptap.mesh.Node
 import io.github.llenoxinn.taptap.mesh.Priority
+import io.github.llenoxinn.taptap.mesh.ReceiveOutcome
 import io.github.llenoxinn.taptap.mesh.RejectReason
 import io.github.llenoxinn.taptap.mesh.ServerCodec
 import io.github.llenoxinn.taptap.mesh.ServerSecret
@@ -44,14 +45,15 @@ private class Phone(val index: Int, val vehicle: Boolean, var x: Double, var y: 
     var pauseUntil = 0
     var link: Link? = null
     var lastUplink = Int.MIN_VALUE / 2
+
+    /** Ids this phone accepted by uplink during its current session (after its SUMMARY went out). */
+    val uplinkGot = HashSet<MsgId>()
 }
 
 /** One session between two phones; frames queue in each direction at the radio's rate. */
 private class Link(val a: Phone, val b: Phone, val sa: SyncSession, val sb: SyncSession) {
     val toA = ArrayDeque<Frame>()
     val toB = ArrayDeque<Frame>()
-    /** Set if either phone uploaded during the session: its store changed after its SUMMARY was sent. */
-    var uplinked = false
 }
 
 private class SentSos(val env: Envelope, val origin: Phone)
@@ -116,8 +118,8 @@ class Simulation(private val p: Params, private val seed: Long) {
             for (ph in phones) {
                 if (inZone(ph) && t - ph.lastUplink >= p.uplinkEveryS) {
                     ph.lastUplink = t
-                    ph.link?.uplinked = true
-                    ph.node.applyUplinkResult(server.upload(ph.node.uplinkBatch(), clock.now))
+                    val outcomes = ph.node.applyUplinkResult(server.upload(ph.node.uplinkBatch(), clock.now))
+                    if (ph.link != null) outcomes.filterIsInstance<ReceiveOutcome.Accepted>().forEach { ph.uplinkGot += it.envelope.msgId }
                 }
             }
             links.toList().forEach(::step)
@@ -204,6 +206,8 @@ class Simulation(private val p: Params, private val seed: Long) {
                 if (t - inRangeSince[k] < p.setupS || a.link != null || b.link != null) continue
                 // shortcut: the simulator reads the peer token directly; a real phone learns it from HELLO.
                 if (a.node.inCooldown(b.node.nodeToken) || b.node.inCooldown(a.node.nodeToken)) continue
+                a.uplinkGot.clear()
+                b.uplinkGot.clear()
                 val link = Link(a, b, a.node.session(), b.node.session())
                 link.toB += link.sa.start()
                 link.toA += link.sb.start()
@@ -217,8 +221,8 @@ class Simulation(private val p: Params, private val seed: Long) {
 
     private fun step(link: Link) {
         if (!inRange(link.a, link.b)) return end(link)
-        deliver(link.toB, link.sb, link.toA)
-        deliver(link.toA, link.sa, link.toB)
+        deliver(link.toB, link.b, link.sb, link.toA)
+        deliver(link.toA, link.a, link.sa, link.toB)
         link.sa.onTick()
         link.sb.onTick()
         val bothDone = link.sa.state == SessionState.DONE && link.sb.state == SessionState.DONE &&
@@ -228,7 +232,7 @@ class Simulation(private val p: Params, private val seed: Long) {
     }
 
     /** Control frames are free; ENVELOPE frames go at `envelopesPerS` per tick (1 s). */
-    private fun deliver(queue: ArrayDeque<Frame>, to: SyncSession, replies: ArrayDeque<Frame>) {
+    private fun deliver(queue: ArrayDeque<Frame>, to: Phone, session: SyncSession, replies: ArrayDeque<Frame>) {
         var envelopes = 0
         while (queue.isNotEmpty()) {
             val frame = queue.first()
@@ -236,22 +240,26 @@ class Simulation(private val p: Params, private val seed: Long) {
                 if (envelopes == p.envelopesPerS) break
                 envelopes++
                 envelopesTx++
+                countDuplicate(to, frame)
             }
             queue.removeFirst()
             val bytes = FrameCodec.encode(frame)
             bytesTx += bytes.size
-            replies += to.onBytes(bytes)
+            replies += session.onBytes(bytes)
         }
+    }
+
+    /** Duplicate = the receiver already holds or tombstoned it. Blamed on the uplink only if that exact id came by uplink mid-session. */
+    private fun countDuplicate(to: Phone, frame: Frame.EnvelopeFrame) {
+        val id = EnvelopeCodec.decode(frame.bytes)?.msgId ?: return
+        if (to.node.store.get(id) == null && !to.node.store.isTombstoned(id)) return
+        if (id in to.uplinkGot) overlapDuplicates++ else duplicates++
     }
 
     private fun end(link: Link) {
         val sessions = listOf(link.sa, link.sb)
         sessions.forEach { it.onDisconnect() } // no-op for a session that already ended
-        for (s in sessions) {
-            s.stats.rejected.forEach { (reason, count) -> rejects.merge(reason, count, Int::plus) }
-            val d = (s.stats.rejected[RejectReason.DUPLICATE] ?: 0) + (s.stats.rejected[RejectReason.TOMBSTONED] ?: 0)
-            if (link.uplinked) overlapDuplicates += d else duplicates += d
-        }
+        for (s in sessions) s.stats.rejected.forEach { (reason, count) -> rejects.merge(reason, count, Int::plus) }
         val states = sessions.map { it.state }
         when {
             states.all { it == SessionState.DONE } -> completed++

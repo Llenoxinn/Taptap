@@ -45,9 +45,9 @@ Every box must be true. Copy this list into the final walkthrough with ✅/❌.
       If it doesn't, **do not tune the scenario or weaken rules to pass**; report the
       numbers to the owner with an analysis (P2).
 - [ ] Simulator reports **0 duplicate envelope transfers** (summary exchange works; holds
-      because a node runs one session at a time, §8.2). Counted over sessions with no
-      mid-session uplink; duplicates caused by an uplink during a session are reported
-      separately (`uplinkOverlapDuplicates`, §10.2).
+      because a node runs one session at a time, §8.2). Counted per envelope; a duplicate
+      of an id the receiver got by uplink *during* that session is reported separately
+      (`uplinkOverlapDuplicates`, §10.2). **Owner decision pending** on this split.
 - [ ] AGENTS.md "Commands" section filled in; ARCHITECTURE.md updated for anything that
       changed; `docs/devlog.md` entry; owner walkthrough given (W8).
 
@@ -79,7 +79,8 @@ Taptap/
 ```
 
 Build rules:
-- **Kotlin JVM plugin**, Gradle **Kotlin DSL**, **version catalog** for every version.
+- **Kotlin JVM plugin**, Gradle **Kotlin DSL**, **version catalog** for every version
+  (one exception: the foojay settings plugin, because settings plugins can't read the catalog).
 - **JDK toolchain 21** via the `foojay-resolver-convention` settings plugin, so Gradle
   downloads a free JDK 21 if needed. The owner has Java 24 installed; the Gradle version
   must support *running* on Java 24 (Gradle ≥ 8.14). Pin exact, current stable versions
@@ -227,6 +228,9 @@ Policy (in `mesh-core`, **not** inside the store implementation):
 - On accepting an **ACK or RECEIPT** for `refMsgId`: remove that SOS and all its UPDATEs,
   add a tombstone until the SOS's `expiresAt`, and **keep the ACK/RECEIPT envelope** so it
   keeps travelling back toward the origin.
+- The node's **own** SOS/UPDATE is always stored, even past capacity (never drop your own SOS).
+- UPDATEs are **not** tombstoned when their SOS is cleared: a late UPDATE (better location
+  after the RECEIPT) must still reach the server, so relays accept and carry it.
 - The origin's own SOS is also kept in an app-level outbox (M2); in M1, `Node` records
   "my SOS ids" so the simulator can detect when the origin receives its ACK.
 - The summary uses 8-byte prefixes. A prefix collision (≈ 2⁻⁶⁴ per pair) only means a
@@ -275,6 +279,8 @@ anything else.
    are **kept** whatever the ending. (At 20 envelopes/s a full 2,000-envelope store needs
    100 s, so 120 s covers it.)
 6. After a session with `nodeToken` T ends, refuse/skip a new session with T for **120 s**.
+7. `toSend` is a snapshot taken at step 2. If the peer gains an envelope mid-session from
+   elsewhere (its own uplink), it may still be sent once; the receiver rejects it as `DUPLICATE`.
 
 ### 8.3 API sketch
 
@@ -392,8 +398,9 @@ spatial grid only if `dense` exceeds 60 s).
 - **Duplicate transfers** (envelope received that the receiver already held/tombstoned) —
   must be 0. Split by cause: if a phone uploads *during* a session, the server's
   RECEIPT/ACK reaches it after its SUMMARY was sent, so the peer may still send that
-  envelope. Those count as `uplinkOverlapDuplicates` (wasted airtime, not a protocol fault;
-  found in the first baseline run: 23 of 69,696 envelope transfers).
+  envelope. A duplicate whose id the receiver got by uplink during that session counts as
+  `uplinkOverlapDuplicates` (wasted airtime, not a protocol fault; first baseline run:
+  23 of 69,696 envelope transfers). Every other duplicate counts as a protocol duplicate.
 - Bytes and envelopes transmitted, sessions started/completed/timed-out.
 - Rejects by `RejectReason`.
 - Max store size on any node.

@@ -128,10 +128,35 @@ class SyncSessionTest {
     }
 
     @Test
+    fun `equal age and priority are ordered by msgId, unsigned`() {
+        val keys = crypto.signKeypair(seed(5))
+        val ids = listOf(0x80, 0x01, 0x7F).map { id(it) }
+        ids.forEach {
+            a.store.put(signedEnvelope(crypto, keys.secretKey, Kind.SOS, it, Priority.URGENT, T0, T0 + 60, keys.publicKey, SERVER_KEY_ID, ByteArray(64)))
+        }
+        assertEquals(listOf(id(0x01), id(0x7F), id(0x80)), sendsTo(a).map { it.msgId })
+    }
+
+    @Test
+    fun `transport disconnect ends the session and keeps what it accepted`() {
+        val s = a.session()
+        s.start()
+        s.onFrame(Frame.Hello(1, 5L, false))
+        val sos = sos(Priority.URGENT)
+        s.onFrame(Frame.EnvelopeFrame(sos.bytes))
+        s.onDisconnect()
+        assertEquals(SessionState.DISCONNECTED, s.state)
+        assertNotNull(a.store.get(sos.msgId))
+        assertTrue(a.inCooldown(5L))
+    }
+
+    @Test
     fun `hard cap at 120 s even while frames keep coming`() {
         val s = a.session()
         s.start()
         s.onFrame(Frame.Hello(1, 5L, false))
+        val kept = sos(Priority.INFO)
+        s.onFrame(Frame.EnvelopeFrame(kept.bytes))
         repeat(23) {
             clock.t += 5
             s.onFrame(Frame.EnvelopeFrame(ByteArray(10))) // junk envelope: rejected, but it is traffic
@@ -142,6 +167,7 @@ class SyncSessionTest {
         s.onTick()
         assertEquals(SessionState.CAPPED, s.state)
         assertEquals(mapOf(RejectReason.SIZE to 23), s.stats.rejected)
+        assertNotNull(a.store.get(kept.msgId), "accepted envelopes survive the cap")
     }
 
     @Test

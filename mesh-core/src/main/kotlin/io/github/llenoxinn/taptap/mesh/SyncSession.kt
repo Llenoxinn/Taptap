@@ -70,7 +70,7 @@ public class SyncSession(private val node: Node) {
     }
 
     /** Call regularly with the injected clock: ends the session on a stall or at the hard cap. */
-    public fun onTick() {
+    public fun onTick(): Unit {
         if (state.ended) return
         val now = node.clock.now()
         when {
@@ -79,7 +79,7 @@ public class SyncSession(private val node: Node) {
         }
     }
 
-    public fun onDisconnect() {
+    public fun onDisconnect(): Unit {
         if (!state.ended) end(SessionState.DISCONNECTED)
     }
 
@@ -92,6 +92,7 @@ public class SyncSession(private val node: Node) {
         return emptyList()
     }
 
+    /** `toSend` is a snapshot: something the peer gains mid-session (e.g. by its own uplink) may still be sent. */
     private fun summary(frame: Frame.Summary): List<Frame> {
         if (sentDone) return fail()
         peerHas += frame.prefixes

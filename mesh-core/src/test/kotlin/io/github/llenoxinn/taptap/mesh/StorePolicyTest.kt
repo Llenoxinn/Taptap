@@ -38,6 +38,7 @@ class StorePolicyTest {
         }
         assertEquals(Rejected(RejectReason.STORE_FULL), node.receive(sos().bytes))
         assertNotNull(store.get(ack.msgId))
+        assertTrue(store.all().all { it.kind.fromServer || it.priority == Priority.CRITICAL }, "only Critical and ACK survive")
     }
 
     @Test

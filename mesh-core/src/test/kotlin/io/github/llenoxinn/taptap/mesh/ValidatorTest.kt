@@ -39,8 +39,17 @@ class ValidatorTest {
     }
 
     @Test
-    fun `UNKNOWN_FORMAT for another version`() {
+    fun `UNKNOWN_FORMAT for another version, kind or priority`() {
         assertRejected(UNKNOWN_FORMAT, sender.sos(sosRequest()).bytes.also { it[0] = 2 })
+        assertRejected(UNKNOWN_FORMAT, sender.sos(sosRequest()).bytes.also { it[1] = 4 })
+        assertRejected(UNKNOWN_FORMAT, sender.sos(sosRequest()).bytes.also { it[18] = 3 })
+    }
+
+    @Test
+    fun `STORE_FULL when only Critical is held`() {
+        val small = node(clock, seedN = 51, config = MeshConfig(storeCapacity = 1))
+        assertIs<Accepted>(small.receive(sender.sos(sosRequest()).bytes))
+        assertEquals(Rejected(STORE_FULL), small.receive(factory(clock, deviceSeed = 2).sos(sosRequest()).bytes))
     }
 
     @Test

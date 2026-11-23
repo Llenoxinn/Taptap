@@ -16,11 +16,11 @@ data class RunMetrics(
     val acksReturned: Int,
     /** Server ACK → origin holds it, seconds. */
     val ackLatenciesS: List<Long>,
-    /** Envelopes received that the receiver already held or had tombstoned, in sessions with no uplink. Must be 0. */
+    /** Envelopes received that the receiver already held or had tombstoned (not via a mid-session uplink). Must be 0. */
     val duplicates: Int,
     /**
-     * The same, in sessions where a phone uploaded mid-session: the server's RECEIPT/ACK reached it by
-     * internet after its SUMMARY was sent, so the peer still sent it. Wasted airtime, not a protocol fault.
+     * Duplicates of an envelope the receiver got by uplink *during* the session, after its SUMMARY was
+     * sent, so the peer still sent it. Wasted airtime, not a protocol fault.
      */
     val uplinkOverlapDuplicates: Int,
     val envelopesTx: Long,
