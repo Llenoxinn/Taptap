@@ -2,11 +2,14 @@
 kotlin = "2.4.21"
 junit = "5.14.4"
 lazysodium = "5.2.0"
+# Same JNA version lazysodium 5.2.0 depends on; needed at compile time for its Pointer parameter.
+jna = "5.17.0"
 
 [libraries]
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 lazysodium = { module = "com.goterl:lazysodium-java", version.ref = "lazysodium" }
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
