@@ -22,6 +22,17 @@ The October draft was written as a funding proposal for an LGU pilot. This plan 
 The problem statement and technical idea are unchanged. The LGU path stays open as a
 **later option** (§8), not a dependency.
 
+### Ground rules (decided 2026-11-23)
+
+| Rule | Decision |
+|---|---|
+| Goal | **Proof it works.** End-to-end delivery shown with real phones and measured. Nobody relies on it in a real disaster |
+| Distribution | Public APK on GitHub Releases with a strong "Not monitored" disclaimer. No Play Store |
+| Licence | Open source, **Apache-2.0** |
+| Budget | **₱0.** Free tools and free tiers only; anything that costs money needs the owner's OK |
+| Schedule | **No deadline.** Work happens whenever the owner is free; `docs/devlog.md` records where work stopped |
+| Who builds | **Agents write the code**; the owner reviews, steers and tests on real phones |
+
 ---
 
 ## 1. Summary
@@ -102,8 +113,14 @@ survives network failure.
 5. **Responder dashboard:** live map + list, one-click acknowledge.
 6. **ACK relay back:** a server-signed ACK ("Help is coming.") flows back through the mesh
    and clears the SOS.
-7. **Disaster Mode:** one switch that starts the relay foreground service.
-8. **Languages:** English, Filipino, Cebuano.
+7. **Disaster Mode:** one switch that starts the relay foreground service. It also turns on
+   automatically 15–30 minutes after signal is lost (Android's background job timing; see
+   ARCHITECTURE.md §3.5), and stays on until the user turns it off.
+8. **Test-version safeguards:** a "Not monitored. Call 911 if you can." warning during setup
+   and on the SOS screen; a "TEST MODE" label on the dashboard.
+9. **Privacy:** reports auto-delete (ARCHITECTURE.md §5); only anonymous `report_metrics`
+   (no location, no sender key) are kept for the field-test numbers; a privacy notice in the app.
+10. **Languages:** English, Filipino, Cebuano, all three from the first screen.
 
 ### 3.2 Out of scope for MVP (revisit only with evidence)
 
@@ -112,7 +129,7 @@ survives network failure.
 - Chat, photos, voice, live location tracking
 - Multiple responder organisations / multi-tenant dashboard
 - Non-Google-Play phones (Huawei HMS) — see risk R3
-- Analytics, accounts for citizens, push notifications
+- Usage tracking or third-party analytics, accounts for citizens, push notifications
 
 ## 4. Milestones
 
@@ -121,24 +138,43 @@ Each milestone ends with something runnable and a short demo note in `docs/devlo
 | # | Milestone | Done when |
 |---|---|---|
 | M0 | **Repo + docs** | This plan, DESIGN.md, ARCHITECTURE.md, AGENTS.md committed |
-| M1 | **Mesh engine on a laptop** | Pure-Kotlin engine passes unit tests; simulator runs 100 virtual phones on a random-walk map and reports delivery rate + median latency |
+| M1 | **Mesh engine on a laptop** | Pure-Kotlin engine passes unit tests; every envelope is signed and its body sealed to the server key; tampered or forged envelopes are rejected by the receive rules (ARCHITECTURE.md §3.2); simulator runs 100 virtual phones on a random-walk map and reports delivery rate + median latency |
 | M2 | **Two phones, airplane mode** | SOS on phone A appears in phone B's store with Wi-Fi/mobile data off |
 | M3 | **End-to-end** | SOS from offline phone → relay → online phone → dashboard pin → ACK shown on origin phone |
 | M4 | **Hardening** | Foreground service survives 8 h on an entry-level phone; battery measured; OEM battery-saver guide written |
-| M5 | **Field test** | 5–10 phones with friends/volunteers across a walkable area; measured delivery rate, median latency, battery/hour |
-| M6 | **Release** | Signed APK on GitHub Releases (Play Store optional), tri-lingual UI, privacy notice |
+| M5a | **Scripted field test** | ~6 phones (2+ brands, 1+ budget phone), planned ~1 km route on a campus or barangay, mobile data + Wi-Fi off to fake a blackout, relay paths of 2–4 hops, one carrier walks into signal; 3 runs; meets every §5.2 check |
+| M5b | **Natural field test** (only after M5a passes) | 15–20 phones carried through a normal day |
+| M6 | **Public release** | Signed APK on GitHub Releases, Cebuano + Filipino reviewed by a native speaker, privacy notice, "Not monitored" disclaimer |
 
 **Order matters:** M1 before any Android UI. The engine is the hard, testable part.
 
+**Prerequisites per milestone** (all free): M1 needs only the JDK (installed: Java 24) and
+Gradle (downloads itself). M2 needs Android Studio + SDK. M3 needs the Supabase CLI and Deno.
+
+**Agent working rule:** before each milestone, explain the plan in plain language; after it,
+give the owner a short walkthrough of what was built (AGENTS.md W8).
+
 ## 5. Success criteria (MVP)
+
+### 5.1 Targets
 
 | Metric | Target | Measured in |
 |---|---|---|
 | Delivery rate in simulator (100 nodes, realistic density) | ≥ 95% within TTL | M1 |
-| Median SOS → dashboard latency in field test | < 30 min | M5 |
+| Median SOS → dashboard latency in field test | < 30 min | M5a |
 | Battery cost of relay mode | < 5% per hour on an entry-level phone | M4 |
 | SOS payload size | < 300 bytes on the wire | M1 |
-| Time from app open to SOS sent | < 10 s, no typing required | M5 |
+| Time from app open to SOS sent | < 10 s, no typing required | M5a |
+
+### 5.2 M5a pass gate (all must pass across 3 runs, or fix and rerun M5a)
+
+| Check | Pass if |
+|---|---|
+| Delivery | ≥ 90% of SOS messages reach the dashboard |
+| Speed | Median send-to-dashboard time ≤ 30 min |
+| Confirmation return | ≥ 80% of acknowledged SOS show "Help is coming." on the sender's phone |
+| Battery | ≤ 5% per hour while relaying, on the budget phone |
+| No false states | **0** cases of "Delivered" or "Help is coming." without a real signed confirmation |
 
 ## 6. Risks
 
@@ -151,7 +187,10 @@ Each milestone ends with something runnable and a short demo note in `docs/devlo
 | R5 | False / spam SOS | Wastes responder time | Per-device signing key, rate limits, responder can mark "false" |
 | R6 | GPS cold start slow without network (no A-GPS) | Missing or late location | Send immediately with last known fix + accuracy; send an update when a better fix arrives |
 | R7 | Android permission friction (Bluetooth, Nearby Wi-Fi, location, notifications) | Users never finish setup | Onboarding asks once, explains why, done *before* a disaster |
-| R8 | Solo developer bandwidth | Scope creep stalls the project | Hard MVP scope (§3.2); YAGNI rule in AGENTS.md |
+| R8 | Solo developer, no deadline | Project stalls | Hard MVP scope (§3.2); YAGNI rule in AGENTS.md; small milestones; `docs/devlog.md` resume notes |
+| R9 | A stranger relies on the public APK in a real disaster | Nobody answers their SOS | "Not monitored. Call 911 if you can." on setup and SOS screen; never an automatic "Help is coming." |
+| R10 | Sleeping phones (Disaster Mode off) can't be woken by a neighbour's SOS | Gaps in no-warning events like earthquakes | Auto-on 15–30 min after signal loss; accepted gap until measured |
+| R11 | Supabase built-in auth email is rate-limited | Magic-link logins/invites fail | Few responders, so likely fine; fallback: owner creates password accounts in the console; free SMTP only with owner OK |
 
 ## 7. Illustrative scenario
 
@@ -169,13 +208,17 @@ Back in the flooded house, the grandson's phone lights up: **"Naabot na. Help is
 ## 8. Later options (not commitments)
 
 - Offer the dashboard to an LGU DRRMO, school or hospital once M5 data exists.
+- A monitored deployment (someone on duty during storms), which would allow removing the
+  "Not monitored" disclaimer.
+- Play Store listing (US$25 one-time; needs the owner's OK under the ₱0 rule).
 - SMS gateway for weak-signal areas.
 - BLE-only transport for non-GMS phones.
 - iOS client.
 
 ## 9. Open questions
 
-1. Who operates the dashboard during the field test, and how is a responder account issued?
-2. Play Store listing or GitHub APK only for M6?
+None open. Resolved 2026-11-23:
 
-_Resolved:_ Info messages ("I'm safe", hazards) are in MVP — see ARCHITECTURE.md §8.
+- Dashboard access: invite + request access, approved by the owner (ARCHITECTURE.md §5).
+- Distribution: GitHub APK only, no Play Store.
+- Info messages ("I'm safe", hazards) are in MVP (ARCHITECTURE.md §8).
