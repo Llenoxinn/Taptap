@@ -1,6 +1,6 @@
 # M2 — Android app ("Two phones, airplane mode")
 
-**Status:** building 2026-11-24.
+**Status:** built 2026-11-25; automated checks pass (78 tests); pending two-phone hardware check.
 **Reads first:** [AGENTS.md](../../AGENTS.md), [ARCHITECTURE.md](../../ARCHITECTURE.md) §1–§6, [DESIGN.md](../../DESIGN.md) §1–§4, §6, [PLAN.md](../../PLAN.md) §4–§5.
 
 ---
@@ -11,14 +11,14 @@ Wrap the pure-Kotlin `mesh-core` engine inside an Android 8+ app (`:android`) so
 
 ## 2. Done when (acceptance checklist)
 
-- [ ] `:android:assembleDebug` produces `android/build/outputs/apk/debug/android-debug.apk` on Windows and `:mesh-core` still has zero `android.*` / `androidx.*` imports (P1).
-- [ ] `:android:testDebugUnitTest` and `gradlew.bat test` pass deterministically with zero real sleeps.
-- [ ] `SodiumAndroidCrypto` implements `Crypto` via `lazysodium-android` (MPL-2.0) + `jna@aar` (Apache-2.0); device Ed25519 seed is wrapped with an Android Keystore AES-256-GCM key in `noBackupFilesDir`.
-- [ ] `RoomMessageStore` implements `MessageStore` (`envelopes` and `tombstones` tables) plus app-level `outbox` and `outbox_peers` tables.
-- [ ] `NearbySessionDriver` drives `SyncSession` over `P2P_CLUSTER`, runs one session at a time, enforces the 2-minute peer cooldown, waits for outbound `ENVELOPE` / `DONE` payload callbacks before disconnecting, and respects the 20s/40s (10s/110s below 20% battery) duty cycle.
-- [ ] `RelayService` runs as a `connectedDevice` foreground service with ongoing carried-count notification and low-battery switch to Critical+ACK only.
-- [ ] Citizen UI covers Onboarding (Language, Welcome, mandatory Test warning, Permissions, Battery exemption, Household size, Privacy), Home (SOS button, I'm safe, Disaster Mode switch, Carried-store inspector sheet, permanent Test banner), ≤ 3-tap SOS flow, Status screen (never showing Delivered/Acknowledged without a verified server RECEIPT/ACK, P4), and Settings (including Test SOS).
-- [ ] All user-facing strings exist in English, Filipino (`values-b+fil` + `values-tl`), and Cebuano (`values-b+ceb`).
+- [x] `:android:assembleDebug` produces `android/build/outputs/apk/debug/android-debug.apk` on Windows and `:mesh-core` still has zero `android.*` / `androidx.*` imports (P1).
+- [x] `:android:testDebugUnitTest` and `gradlew.bat test` pass deterministically with zero real sleeps.
+- [x] `SodiumAndroidCrypto` implements `Crypto` via `lazysodium-android` (MPL-2.0) + `jna@aar` (Apache-2.0); device Ed25519 seed is wrapped with an Android Keystore AES-256-GCM key in `noBackupFilesDir`.
+- [x] `RoomMessageStore` implements `MessageStore` (`envelopes` and `tombstones` tables) plus app-level `outbox` and `outbox_peers` tables.
+- [x] `NearbySessionDriver` drives `SyncSession` over `P2P_CLUSTER`, runs one session at a time, enforces the 2-minute peer cooldown, waits for outbound `ENVELOPE` / `DONE` payload callbacks before disconnecting, and respects the 20s/40s (10s/110s below 20% battery) duty cycle.
+- [x] `RelayService` runs as a `connectedDevice` foreground service with ongoing carried-count notification and low-battery switch to Critical+ACK only.
+- [x] Citizen UI covers Onboarding (Language, Welcome, mandatory Test warning, Permissions, Battery exemption, Household size, Privacy), Home (SOS button, I'm safe, Disaster Mode switch, Carried-store inspector sheet, permanent Test banner), ≤ 3-tap SOS flow, Status screen (never showing Delivered/Acknowledged without a verified server RECEIPT/ACK, P4), and Settings (including Test SOS).
+- [x] All user-facing strings exist in English, Filipino (`values-b+fil` + `values-tl`), and Cebuano (`values-b+ceb`).
 - [ ] Hardware check (owner): SOS sent on Phone A appears in Phone B's carried-store list with Wi-Fi and mobile data off.
 
 ## 3. Scope boundaries (YAGNI)

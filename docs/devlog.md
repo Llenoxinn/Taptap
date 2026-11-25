@@ -2,6 +2,35 @@
 
 Newest entry first. One entry per work session (AGENTS.md W8).
 
+## 2026-11-25 — M2 built
+
+- **Done:** M2 Android citizen app (`:android` module on AGP 9.5.2 built-in Kotlin,
+  `compileSdk`/`targetSdk` 36, `minSdk` 26, Compose BOM `2026.06.01`, Room 2.8.5, KSP 2.3.14).
+  Installed Android SDK command-line tools (`platforms;android-36`, `platform-tools`,
+  `build-tools;36.1.0`) locally with `local.properties` git-ignored. Implemented
+  `SodiumAndroidCrypto` (`lazysodium-android:5.2.0` + `jna:5.17.0@aar`), Android Keystore
+  AES-256-GCM device Ed25519 seed store (`DeviceIdentity`), pinned M2 test server keyring,
+  `RoomMessageStore` + `outbox`/`outbox_peers`, `LocationUpdatePolicy` (>50% accuracy improvement
+  or first fix triggers `UPDATE`) + `AndroidLocationProvider`, `MeshRuntime`,
+  `NearbySessionDriver` (`P2P_CLUSTER`, tie-broken initiation, payload-flush wait before
+  disconnect, 20s/40s and low-battery 10s/110s duty cycle), `RelayService` (`connectedDevice`
+  foreground service), Compose UI (Onboarding, Home with carried-store inspector sheet,
+  ≤ 3-tap SOS flow, P4-enforced Status screen, Settings with Test SOS), and full
+  English / Filipino / Cebuano translations. Added a direct-extraction fallback in
+  `SodiumJvmCrypto` for mixed classpaths under Robolectric and bounded Gradle memory in
+  `gradle.properties` for 5 GB RAM hosts.
+- **Checks:** 78 tests pass (`gradlew.bat test`: 64 `mesh-core`, 4 `crypto-jvm`, 4 `simulator`,
+  6 `android` unit/Robolectric tests), `:android:assembleDebug` builds
+  `android/build/outputs/apk/debug/android-debug.apk` (16,877,384 B), `mesh-core` has 0
+  Android imports. Fresh-eyes W5 review (`flash_lite`) found no bugs, leaks, or rule
+  violations.
+- **Stopped at:** M2 built, verified, committed, and pushed to `origin/main`; ready for the
+  owner's two-phone airplane-mode test (`%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe
+  install -r android\build\outputs\apk\debug\android-debug.apk`).
+- **Next:** Owner tests Phone A -> Phone B in airplane mode (Bluetooth on); then M3
+  (Supabase schema/RLS/Edge Function `/intake`, Android HTTP uplink client, and React/MapLibre
+  responder dashboard).
+
 ## 2026-11-23 (night) — M1 follow-ups
 
 - **Done:** pushed M1 to GitHub. Owner **accepted the duplicate split** (protocol
