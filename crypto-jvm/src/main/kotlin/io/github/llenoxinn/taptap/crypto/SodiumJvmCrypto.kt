@@ -4,6 +4,9 @@ import com.goterl.lazysodium.SodiumJava
 import io.github.llenoxinn.taptap.mesh.BoxKeypair
 import io.github.llenoxinn.taptap.mesh.Crypto
 import io.github.llenoxinn.taptap.mesh.SignKeypair
+import java.nio.file.FileSystemNotFoundException
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 /** [Crypto] backed by libsodium via lazysodium-java (bundled native library). */
 public class SodiumJvmCrypto : Crypto {
@@ -63,6 +66,30 @@ public class SodiumJvmCrypto : Crypto {
         const val SEAL_BYTES = 48
 
         // Loading the native library is slow; do it once per JVM.
-        val shared: SodiumJava by lazy { SodiumJava() }
+        // Fall back to direct resource extraction when lazysodium-android shadows LibraryLoader in unit tests.
+        val shared: SodiumJava by lazy {
+            try {
+                SodiumJava()
+            } catch (_: FileSystemNotFoundException) {
+                SodiumJava(extractBundledSodium())
+            }
+        }
+
+        private fun extractBundledSodium(): String {
+            val os = System.getProperty("os.name").lowercase()
+            val arch = System.getProperty("os.arch").lowercase()
+            val isArm = arch.contains("aarch64") || arch.contains("arm")
+            val (resPath, suffix) = when {
+                os.contains("win") -> (if (arch.contains("64")) "windows64/libsodium.dll" else "windows/libsodium.dll") to ".dll"
+                os.contains("mac") -> (if (isArm) "mac_arm/libsodium.dylib" else "mac/libsodium.dylib") to ".dylib"
+                else -> (if (isArm) "arm64/libsodium.so" else "linux64/libsodium.so") to ".so"
+            }
+            val stream = checkNotNull(SodiumJava::class.java.classLoader.getResourceAsStream(resPath)) {
+                "Missing bundled libsodium resource: $resPath"
+            }
+            val tmp = Files.createTempFile("taptap-sodium-", suffix).apply { toFile().deleteOnExit() }
+            stream.use { Files.copy(it, tmp, StandardCopyOption.REPLACE_EXISTING) }
+            return tmp.toAbsolutePath().toString()
+        }
     }
 }
