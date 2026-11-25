@@ -131,11 +131,13 @@ Gradle wrapper, JDK 21 toolchain (downloaded automatically). On Windows use `gra
 
 | What | Command |
 |---|---|
-| All tests | `gradlew.bat test` |
+| All tests (JVM + Android) | `gradlew.bat test` |
 | One module | `gradlew.bat :mesh-core:test` |
 | One test class | `gradlew.bat :mesh-core:test --tests "*ValidatorTest*"` |
 | Rewrite golden vectors (on purpose only) | `gradlew.bat :mesh-core:test --tests "*GoldenVectorsTest*" -PwriteVectors` |
 | Simulator | `gradlew.bat :simulator:run --args="--preset baseline --seeds 1-5"` |
+| Android unit tests | `gradlew.bat :android:testDebugUnitTest` |
+| Android debug APK | `gradlew.bat :android:assembleDebug` |
 | Build everything | `gradlew.bat build` |
 
 No separate linter yet (YAGNI); the compiler's `explicitApi()` check runs on `mesh-core` and `crypto-jvm`.

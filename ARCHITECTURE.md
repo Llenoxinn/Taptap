@@ -180,16 +180,16 @@ analysis of priority/timing.
 
 ## 6. Android specifics
 
-- `minSdk 26` (Android 8), `targetSdk` = latest stable.
-- Permissions (set `maxSdkVersion` on the legacy ones; check against the Nearby Connections
-  setup docs before M2):
+- `minSdk 26` (Android 8), `targetSdk` = 36.
+- Permissions (checked against Nearby Connections setup docs; runtime prompts are separate from manifest declarations):
   - All: `INTERNET`, `ACCESS_NETWORK_STATE`, `ACCESS_WIFI_STATE`, `CHANGE_WIFI_STATE`,
-    `ACCESS_FINE_LOCATION`, `FOREGROUND_SERVICE` (28+)
-  - ≤ 30: `BLUETOOTH`, `BLUETOOTH_ADMIN`, `ACCESS_COARSE_LOCATION`
-  - 31+: `BLUETOOTH_SCAN`, `BLUETOOTH_ADVERTISE`, `BLUETOOTH_CONNECT`
-  - 33+: `NEARBY_WIFI_DEVICES`, `POST_NOTIFICATIONS`
+    `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION`, `VIBRATE`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`,
+    `FOREGROUND_SERVICE` (28+)
+  - ≤ 30: `BLUETOOTH`, `BLUETOOTH_ADMIN`
+  - 31+: `BLUETOOTH_SCAN`, `BLUETOOTH_ADVERTISE`, `BLUETOOTH_CONNECT` (`BLUETOOTH_SCAN` sets `usesPermissionFlags="neverForLocation"` so Nearby relay discovery works without deriving location)
+  - 33+: `NEARBY_WIFI_DEVICES` (`usesPermissionFlags="neverForLocation"`), `POST_NOTIFICATIONS`
   - 34+: `FOREGROUND_SERVICE_CONNECTED_DEVICE`
-- Location: `FusedLocationProvider` with last-known fallback; send `UPDATE` when accuracy improves by > 50%.
+- Location: `FusedLocationProvider` with last-known fallback (and `LocationManager` fallback offline); send `UPDATE` when the initial SOS had no fix or accuracy improves by > 50%.
 - Requires Google Play services (PLAN.md R3).
 
 ## 7. Testing strategy
@@ -224,3 +224,8 @@ analysis of priority/timing.
 | 2026-11-23 | UPDATEs are not tombstoned when their SOS is cleared | A late UPDATE carries a better location the server still needs |
 | 2026-11-23 | Simulator reports duplicates caused by a mid-session uplink separately from protocol duplicates (owner accepted 2026-11-23) | The SUMMARY is a snapshot; an uplink can add an id after it is sent. Found in the first baseline run (23 of 69,696 transfers) |
 | 2026-11-23 | Gradle 9.9.2, Kotlin 2.4.21, JUnit 5.14.4, JDK 21 toolchain; foojay plugin pinned in `settings.gradle.kts` | Settings plugins can't read the version catalog |
+| 2026-11-24 | `:android` uses AGP 9.5.2 (built-in Kotlin), Room 2.8.5 (KSP 2.3.14), Compose BOM 2026.06.01, `compileSdk`/`targetSdk` 36 | Built-in Kotlin avoids legacy `kotlin-android` conflict in AGP 9+; all deps Apache-2.0 |
+| 2026-11-24 | `:android` uses `lazysodium-android:5.2.0` (MPL-2.0, excluding desktop JNA) + `jna:5.17.0@aar` (Apache-2.0 option) | Native `.so` bindings for Android ABIs compatible with Apache-2.0 (P6) |
+| 2026-11-24 | Device Ed25519 seed wrapped in Android Keystore AES-256-GCM (`noBackupFilesDir`); M2 test server keyring pinned from `envelope-v1.txt` public keys | Keeps device signing identity off backup and keeps server secret keys out of the APK (G4) |
+| 2026-11-24 | `ACCESS_COARSE_LOCATION` declared for all APIs; `BLUETOOTH_SCAN` and `NEARBY_WIFI_DEVICES` set `neverForLocation` | Android 12+ requires coarse alongside fine location, while Nearby relay works even if GPS permission is declined |
+| 2026-11-24 | App-level `outbox` and `outbox_peers` tables live in Room alongside `envelopes`/`tombstones` | Tracks unique peer relay count and verified `RECEIPT`/`ACK` timestamps separately from `MessageStore` |

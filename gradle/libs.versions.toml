@@ -1,18 +1,57 @@
 [versions]
 kotlin = "2.4.21"
+agp = "9.5.2"
+ksp = "2.3.14"
 junit = "5.14.4"
+junit4 = "4.13.2"
 lazysodium = "5.2.0"
 # Same JNA version lazysodium 5.2.0 depends on; needed at compile time for its Pointer parameter.
 jna = "5.17.0"
 # Same version lazysodium pulls in for slf4j-api; nop binding only silences the "no providers" warning.
 slf4j = "2.0.17"
+compose-bom = "2026.06.01"
+core-ktx = "1.17.0"
+appcompat = "1.7.1"
+activity-compose = "1.12.4"
+lifecycle = "2.10.0"
+room = "2.8.5"
+coroutines = "1.10.2"
+play-services-nearby = "19.5.1"
+play-services-location = "21.3.0"
+robolectric = "4.18.1"
+androidx-test-core = "1.7.0"
 
 [libraries]
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+junit4 = { module = "junit:junit", version.ref = "junit4" }
 lazysodium = { module = "com.goterl:lazysodium-java", version.ref = "lazysodium" }
+lazysodium-android = { module = "com.goterl:lazysodium-android", version.ref = "lazysodium" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 slf4j-nop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4j" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+compose-foundation = { module = "androidx.compose.foundation:foundation" }
+compose-material3 = { module = "androidx.compose.material3:material3" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+play-services-nearby = { module = "com.google.android.gms:play-services-nearby", version.ref = "play-services-nearby" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "play-services-location" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-test-core = { module = "androidx.test:core-ktx", version.ref = "androidx-test-core" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
