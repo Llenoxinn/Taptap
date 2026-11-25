@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Taptap</string>
+
+    <!-- Language names -->
+    <string name="lang_en">English</string>
+    <string name="lang_fil">Filipino</string>
+    <string name="lang_ceb">Cebuano</string>
+
+    <!-- Key DESIGN.md §4 strings -->
+    <string name="sos_button">SOS</string>
+    <string name="priority_critical">Kritikal — naipit o samdan</string>
+    <string name="priority_urgent">Urgent — kinahanglan og rescue, bakwit, o nawala</string>
+    <string name="priority_info">Impormasyon — peligro, suplay, luwas ko</string>
+    <string name="priority_short_critical">Kritikal</string>
+    <string name="priority_short_urgent">Urgent</string>
+    <string name="priority_short_info">Impor.</string>
+    <string name="status_saved">Na-save sa imong phone</string>
+    <string name="status_ack">Naabot na. Padulong na ang tabang.</string>
+    <string name="relay_on">Nagpasa ang Taptap</string>
+    <string name="not_monitored">Walay nagbantay. Tawag sa 911 kon makaya.</string>
+    <string name="onboarding_test_warning">Test version ni. Walay nagbantay sa mga SOS. Sa emergency, tawag sa 911 kon makaya.</string>
+    <string name="home_test_banner">Test version · walay nagbantay · tawag sa 911</string>
+    <string name="relay_auto_on">Walay signal — giablihan sa Taptap ang pagpasa</string>
+    <string name="relay_auto_failed">Walay signal — i-tap aron ablihan ang pagpasa</string>
+
+    <!-- Common buttons -->
+    <string name="action_continue">Padayon</string>
+    <string name="action_next">Sunod</string>
+    <string name="action_finish">Human na</string>
+    <string name="action_back">Balik</string>
+    <string name="action_close">Isira</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_language_title">Pilia ang pinulongan</string>
+    <string name="onboarding_welcome_title">Ilaila si Taptap</string>
+    <string name="onboarding_welcome_body">Ipasa sa Taptap ang imong SOS gikan sa phone ngadto sa laing phone bisan walay signal.</string>
+    <string name="onboarding_test_title">Pahimangno sa test version</string>
+    <string name="onboarding_i_understand">Nakasabot ko</string>
+    <string name="onboarding_permissions_title">Ihatag ang mga pagtugot sa dili pa ang kalamidad</string>
+    <string name="perm_location_title">Lokasyon</string>
+    <string name="perm_location_why">Aron makit-an ka sa mga rescuer.</string>
+    <string name="perm_nearby_title">Duol nga mga device</string>
+    <string name="perm_nearby_why">Aron mapasa ang mga mensahe sa laing phone.</string>
+    <string name="perm_notifications_title">Mga pahibalo</string>
+    <string name="perm_notifications_why">Aron mahibal-an nimo kon padulong na ang tabang.</string>
+    <string name="perm_allow">Tugoti</string>
+    <string name="perm_allowed">Gitugotan</string>
+    <string name="perm_not_now">Dili lang sa karon</string>
+    <string name="onboarding_battery_title">Padayona ang pagpasa</string>
+    <string name="onboarding_battery_body">Tugoti ang Taptap nga modagan nga walay limitasyon sa baterya aron dili mohunong ang pagpasa kon mapalong ang screen.</string>
+    <string name="onboarding_battery_open">Kuhaa ang limit sa baterya</string>
+    <string name="onboarding_battery_already">Walay limit sa baterya</string>
+    <string name="onboarding_household_title">Pila mo sa panimalay</string>
+    <string name="onboarding_household_body">Mo-andam kini sa ihap sa tawo sa SOS. Dili mangayo ang Taptap og ngalan o numero.</string>
+    <string name="onboarding_privacy_title">Imong privacy</string>
+    <string name="onboarding_privacy_body">Naka-seal ang imong lokasyon, ihap sa tawo, ug nota sa SOS aron server ra ang makabasa. Ang makita ra sa ubang phone mao ang prayoridad, hop count, ug anonymous key. Mabura ang test report human sa 7 ka adlaw; ang uban human sa 30 ka adlaw.</string>
+
+    <!-- Home & relay -->
+    <string name="home_relay_on_badge">Nagpasa ON</string>
+    <string name="home_relay_off_badge">Nagpasa OFF</string>
+    <string name="home_im_safe">Luwas ko</string>
+    <string name="home_disaster_mode">Disaster Mode</string>
+    <string name="home_disaster_mode_hint">Nagpasa og mga SOS pinaagi sa Bluetooth ug Wi-Fi bisan walay signal.</string>
+    <string name="home_tap_to_inspect">I-tap aron makita ang mga gidala nga mensahe</string>
+    <string name="home_view_last_sos">Tan-awa ang status sa pinakabag-ong SOS</string>
+    <string name="relay_channel_name">Serbisyo sa Pagpasa sa SOS</string>
+    <string name="relay_notification_text">Nagpasa ang Taptap · %1$d mensahe · i-tap aron ihunong.</string>
+    <string name="relay_low_battery">Ubos ang baterya: Kritikal nga mensahe ra ang gipasa.</string>
+    <string name="relay_stop_action">Hunonga</string>
+
+    <plurals name="carrying_messages">
+        <item quantity="one">Nagdala og %1$d mensahe</item>
+        <item quantity="other">Nagdala og %1$d mensahe</item>
+    </plurals>
+
+    <!-- SOS flow -->
+    <string name="sos_step1_title">Unsa ang emergency?</string>
+    <string name="sos_step2_title">Pila ka tawo?</string>
+    <string name="sos_people_label">Mga tawo</string>
+    <string name="sos_injured_label">Samdan</string>
+    <string name="sos_injured_3_plus">3+</string>
+    <string name="sos_step3_title">Kumpirmaha ug ipadala</string>
+    <string name="sos_details_optional">Opsyonal nga detalye</string>
+    <string name="chip_flooding">Baha</string>
+    <string name="chip_elderly">Tigulang</string>
+    <string name="chip_child">Bata</string>
+    <string name="chip_pregnant">Mabdos</string>
+    <string name="chip_medicine">Kinahanglan og tambal</string>
+    <string name="sos_add_note_toggle">Dugang og mubong nota</string>
+    <string name="sos_note_hint">Mubong nota (opsyonal)</string>
+    <string name="sos_send_confirm">I-tap aron ipadala ang SOS</string>
+    <string name="sos_location_attached">Naa nay lokasyon (±%1$dm)</string>
+    <string name="sos_location_pending">Nagpaabot pa sa GPS — mapadala gihapon dayon ang SOS</string>
+    <string name="sos_test_mode_tag">Test SOS</string>
+
+    <!-- Status screen -->
+    <string name="status_screen_title">Status sa SOS</string>
+    <string name="status_id_label">ID sa Mensahe: %1$s</string>
+    <string name="status_saved_detail">Naa na sa lokal nga store, nagpaabot sa duol nga phone</string>
+    <string name="status_passed_title">Napasa na</string>
+    <string name="status_passed_waiting">Nagpaabot sa duol nga phone</string>
+    <plurals name="status_passed_count">
+        <item quantity="one">Napasa sa %1$d phone</item>
+        <item quantity="other">Napasa sa %1$d phone</item>
+    </plurals>
+    <string name="status_delivered_title">Nakaabot sa mga rescuer</string>
+    <string name="status_delivered_detail">Nadawat ang resibo gikan sa server pinaagi sa mesh</string>
+    <string name="status_delivered_waiting">Nagpaabot sa phone nga naay signal</string>
+    <string name="status_ack_waiting">Nagpaabot sa kumpirmasyon sa rescuer</string>
+    <string name="status_ack_resolved">Gimarkahan nga nasulbad na sa rescuer.</string>
+    <string name="status_ack_false">Gimarkahan nga sayop nga report sa rescuer.</string>
+    <string name="status_guidance">Padayona nga abli ang Taptap ug naka-charge ang phone. Balhin sa mas taas nga lugar kon luwas.</string>
+
+    <!-- Carried store sheet -->
+    <string name="store_sheet_title">Mga gidala nga mensahe (%1$d)</string>
+    <string name="store_sheet_empty">Wala pay mensahe nga gitipigan. Ablihi ang Disaster Mode aron makadawat gikan sa duol nga phone.</string>
+    <string name="store_row_kind_sos">SOS</string>
+    <string name="store_row_kind_update">Update sa lokasyon</string>
+    <string name="store_row_kind_ack">ACK sa Rescuer</string>
+    <string name="store_row_kind_receipt">Resibo sa Server</string>
+    <string name="store_row_meta">ID %1$s · %2$d hop · %3$s</string>
+    <string name="store_row_yours">Imong SOS</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Mga Setting</string>
+    <string name="settings_language">Pinulongan</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_dark">Ngitngit (makatipid sa baterya)</string>
+    <string name="settings_theme_light">Hayag</string>
+    <string name="settings_household">Gidak-on sa panimalay</string>
+    <string name="settings_battery_guide">Pag-optimize sa baterya</string>
+    <string name="settings_send_test_sos">Magpadala og test SOS</string>
+    <string name="settings_send_test_sos_desc">Nagpadala og Kritikal nga SOS nga may TEST flag aron matago sa dashboard.</string>
+    <string name="settings_privacy_about">Privacy ug mahitungod</string>
+    <string name="settings_device_key">Key sa device: %1$s</string>
+    <string name="settings_replay_onboarding">Tan-awa pag-usab ang pahimangno ug setup</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_settings">Ablihi ang mga setting</string>
+    <string name="cd_back">Balik</string>
+    <string name="cd_decrease_people">Kuhaan ang tawo</string>
+    <string name="cd_increase_people">Dugangan ang tawo</string>
+    <string name="cd_firefly_mascot">Si Taptap ang aninipot</string>
+</resources>

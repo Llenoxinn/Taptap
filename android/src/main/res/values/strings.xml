@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Taptap</string>
+
+    <!-- Language names -->
+    <string name="lang_en">English</string>
+    <string name="lang_fil">Filipino</string>
+    <string name="lang_ceb">Cebuano</string>
+
+    <!-- Key DESIGN.md §4 strings -->
+    <string name="sos_button">SOS</string>
+    <string name="priority_critical">Critical — trapped or injured</string>
+    <string name="priority_urgent">Urgent — need rescue, evacuation, or missing person</string>
+    <string name="priority_info">Info — hazard, supplies, I\'m safe</string>
+    <string name="priority_short_critical">Critical</string>
+    <string name="priority_short_urgent">Urgent</string>
+    <string name="priority_short_info">Info</string>
+    <string name="status_saved">Saved on your phone</string>
+    <string name="status_ack">Help is coming.</string>
+    <string name="relay_on">Taptap is relaying</string>
+    <string name="not_monitored">Not monitored. Call 911 if you can.</string>
+    <string name="onboarding_test_warning">This is a test version. Nobody is watching for SOS messages. In an emergency, call 911 if you can.</string>
+    <string name="home_test_banner">Test version · not monitored · call 911</string>
+    <string name="relay_auto_on">No signal — Taptap turned on relaying</string>
+    <string name="relay_auto_failed">No signal — tap to turn on relaying</string>
+
+    <!-- Common buttons -->
+    <string name="action_continue">Continue</string>
+    <string name="action_next">Next</string>
+    <string name="action_finish">Done</string>
+    <string name="action_back">Back</string>
+    <string name="action_close">Close</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_language_title">Choose language</string>
+    <string name="onboarding_welcome_title">Meet Taptap</string>
+    <string name="onboarding_welcome_body">Taptap passes your SOS phone to phone when there is no signal.</string>
+    <string name="onboarding_test_title">Test version warning</string>
+    <string name="onboarding_i_understand">I understand</string>
+    <string name="onboarding_permissions_title">Allow permissions before a storm</string>
+    <string name="perm_location_title">Location</string>
+    <string name="perm_location_why">So rescuers can find you.</string>
+    <string name="perm_nearby_title">Nearby devices</string>
+    <string name="perm_nearby_why">To pass messages to other phones.</string>
+    <string name="perm_notifications_title">Notifications</string>
+    <string name="perm_notifications_why">To tell you when help is coming.</string>
+    <string name="perm_allow">Allow</string>
+    <string name="perm_allowed">Allowed</string>
+    <string name="perm_not_now">Not now</string>
+    <string name="onboarding_battery_title">Keep relay running</string>
+    <string name="onboarding_battery_body">Allow Taptap to run without battery restrictions so relaying does not stop when the screen is off.</string>
+    <string name="onboarding_battery_open">Turn off battery limits</string>
+    <string name="onboarding_battery_already">Battery limits off</string>
+    <string name="onboarding_household_title">People in your household</string>
+    <string name="onboarding_household_body">Pre-fills the SOS headcount. Taptap never asks for names or phone numbers.</string>
+    <string name="onboarding_privacy_title">Your privacy</string>
+    <string name="onboarding_privacy_body">Your SOS location, headcount, and note are sealed so only the server can read them. Nearby phones only see priority, hop count, and an anonymous key. Test reports delete after 7 days; other reports delete after 30 days.</string>
+
+    <!-- Home & relay -->
+    <string name="home_relay_on_badge">Relay ON</string>
+    <string name="home_relay_off_badge">Relay OFF</string>
+    <string name="home_im_safe">I\'m safe</string>
+    <string name="home_disaster_mode">Disaster Mode</string>
+    <string name="home_disaster_mode_hint">Passes SOS messages over Bluetooth and Wi-Fi without signal.</string>
+    <string name="home_tap_to_inspect">Tap to view carried messages</string>
+    <string name="home_view_last_sos">View latest SOS status</string>
+    <string name="relay_channel_name">SOS Relay Service</string>
+    <string name="relay_notification_text">Taptap is relaying · %1$d messages · tap to stop.</string>
+    <string name="relay_low_battery">Low battery: passing Critical messages only.</string>
+    <string name="relay_stop_action">Stop</string>
+
+    <plurals name="carrying_messages">
+        <item quantity="one">Carrying %1$d message</item>
+        <item quantity="other">Carrying %1$d messages</item>
+    </plurals>
+
+    <!-- SOS flow -->
+    <string name="sos_step1_title">What is the emergency?</string>
+    <string name="sos_step2_title">How many people?</string>
+    <string name="sos_people_label">People</string>
+    <string name="sos_injured_label">Injured</string>
+    <string name="sos_injured_3_plus">3+</string>
+    <string name="sos_step3_title">Confirm and send</string>
+    <string name="sos_details_optional">Optional details</string>
+    <string name="chip_flooding">Flooding</string>
+    <string name="chip_elderly">Elderly</string>
+    <string name="chip_child">Child</string>
+    <string name="chip_pregnant">Pregnant</string>
+    <string name="chip_medicine">Need medicine</string>
+    <string name="sos_add_note_toggle">Add a short note</string>
+    <string name="sos_note_hint">Short note (optional)</string>
+    <string name="sos_send_confirm">Tap to send SOS</string>
+    <string name="sos_location_attached">Location attached (±%1$dm)</string>
+    <string name="sos_location_pending">Location pending — SOS sends immediately</string>
+    <string name="sos_test_mode_tag">Test SOS</string>
+
+    <!-- Status screen -->
+    <string name="status_screen_title">SOS Status</string>
+    <string name="status_id_label">Message ID: %1$s</string>
+    <string name="status_saved_detail">In local store, waiting for nearby phones</string>
+    <string name="status_passed_title">Passed on</string>
+    <string name="status_passed_waiting">Waiting for nearby phones</string>
+    <plurals name="status_passed_count">
+        <item quantity="one">Passed to %1$d phone</item>
+        <item quantity="other">Passed to %1$d phones</item>
+    </plurals>
+    <string name="status_delivered_title">Reached responders</string>
+    <string name="status_delivered_detail">Server receipt received via mesh</string>
+    <string name="status_delivered_waiting">Waiting for a phone with signal</string>
+    <string name="status_ack_waiting">Waiting for responder acknowledgement</string>
+    <string name="status_ack_resolved">Marked resolved by responder.</string>
+    <string name="status_ack_false">Marked false report by responder.</string>
+    <string name="status_guidance">Keep Taptap open and your phone charged. Move to higher ground if safe.</string>
+
+    <!-- Carried store sheet -->
+    <string name="store_sheet_title">Carried messages (%1$d)</string>
+    <string name="store_sheet_empty">No messages stored yet. Turn on Disaster Mode to receive from nearby phones.</string>
+    <string name="store_row_kind_sos">SOS</string>
+    <string name="store_row_kind_update">Location update</string>
+    <string name="store_row_kind_ack">Responder ACK</string>
+    <string name="store_row_kind_receipt">Server receipt</string>
+    <string name="store_row_meta">ID %1$s · %2$d hops · %3$s</string>
+    <string name="store_row_yours">Your SOS</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_dark">Dark (saves battery)</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_household">Household size</string>
+    <string name="settings_battery_guide">Battery optimisation</string>
+    <string name="settings_send_test_sos">Send test SOS</string>
+    <string name="settings_send_test_sos_desc">Sends a Critical SOS marked TEST so it is hidden by default on the dashboard.</string>
+    <string name="settings_privacy_about">Privacy &amp; about</string>
+    <string name="settings_device_key">Device key: %1$s</string>
+    <string name="settings_replay_onboarding">Review safety notice &amp; setup</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_settings">Open settings</string>
+    <string name="cd_back">Go back</string>
+    <string name="cd_decrease_people">Decrease people</string>
+    <string name="cd_increase_people">Increase people</string>
+    <string name="cd_firefly_mascot">Taptap the firefly mascot</string>
+</resources>
